@@ -2,5 +2,5 @@
 
 Node.js base docker image.
 
-*observe:*  
-Currently, the image is just inheriting from the official nodejs alpine image, this will change in the future, so do not rely on this image to be a mirror of the official image.
+For now, this image is just a tad bit more installed packages than the official alpine nodejs image (which it derives from).  
+It will though, be changed over time, so do not count on this image to be a mirror of the official nodejs image!
