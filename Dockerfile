@@ -5,6 +5,7 @@ ENV NODE_VERSION="8.2.1"
 ADD ./gpgkeys.txt /gpgkeys.txt
 
 RUN apk add --no-cache --virtual trash git g++ autoconf gcc gnupg wget make python linux-headers make libgcc \
+    && apk add --no-cache libstdc++ \
     && for key in `cat /gpgkeys.txt`; do \
         gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
         gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
