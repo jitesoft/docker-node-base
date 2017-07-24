@@ -1,7 +1,7 @@
 FROM alpine:latest
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
-ENV NODE_VERSION="6.11.1"
+ENV NODE_VERSION="8.2.1"
 ADD ./gpgkeys.txt /gpgkeys.txt
 
 RUN apk add --no-cache --virtual trash git g++ autoconf gcc gnupg wget make python linux-headers make libgcc \

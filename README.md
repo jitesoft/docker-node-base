@@ -8,6 +8,6 @@ This image contains nothing but node.js and npm and is intended as a base image 
 * 8, latest [(Dockerfile)](https://github.com/jitesoft/docker-node-base/blob/8/Dockerfile)
 * 6 [(Dockerfile)](https://github.com/jitesoft/docker-node-base/blob/6/Dockerfile)
 
-### LTS - Long time support
+### Current
 
-This image uses the LTS (Boron/v6.x) source of nodejs which includes npm 3.10
+This image uses the `current` (v8.x) source of nodejs, which includes npm 5.3
