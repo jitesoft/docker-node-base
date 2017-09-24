@@ -12,7 +12,7 @@ RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
     done
 
-ARG NODE_VERSION="6.11.3"
+ARG NODE_VERSION="8.5.0"
 
 # This layer will have to be rebuilt for each version.
 RUN wget https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}.tar.xz \
