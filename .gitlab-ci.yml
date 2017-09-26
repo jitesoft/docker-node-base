@@ -3,13 +3,17 @@ image: docker:latest
 before_script:
   - docker info
 
+variables:
+  TAG: $CI_COMMIT_REF_NAME
+
 deploy:
   stage: deploy
   script:
-    - docker build -t jitesoft/node-base:$CI_COMMIT_REF_NAME -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$CI_COMMIT_REF_NAME . 
+    - $TAG=$(["$TAG" == "master"] && echo "latest" || echo $TAG)
+    - docker build -t jitesoft/node-base:$TAG -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG . 
     - docker login -u $HUB_USER -p $HUB_PW
-    - docker push jitesoft/node-base:$CI_COMMIT_REF_NAME
+    - docker push jitesoft/node-base:$TAG
     - docker logout
     - docker login -u gitlab-ci-token -p $GITLAB_CI_TOKEN registry.gitlab.com
-    - docker push registry.gitlab.com/jitesoft/dockerfiles/node-base:$CI_COMMIT_REF_NAME
+    - docker push registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG
     - docker logout
