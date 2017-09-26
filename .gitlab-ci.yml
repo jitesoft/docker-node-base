@@ -6,7 +6,7 @@ variables:
 
 before_script:
   - docker info
-  - eval `[[ $TAG = "master" ]] && $TAG="latest" || $TAG="$TAG"`
+  - eval `[[ "$TAG" = "master" ]] && $TAG="latest" || $TAG="$TAG"`
   - echo $TAG
 
 deploy:
