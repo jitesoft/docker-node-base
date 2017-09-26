@@ -9,7 +9,7 @@ variables:
 deploy:
   stage: deploy
   script:
-    - $TAG=$(["$TAG" == "master"] && echo "latest" || echo $TAG)
+    - [[ $TAG = "master" ]] && $TAG="latest"
     - docker build -t jitesoft/node-base:$TAG -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG . 
     - docker login -u $HUB_USER -p $HUB_PW
     - docker push jitesoft/node-base:$TAG
