@@ -7,7 +7,7 @@ deploy:
   stage: deploy
   script:
     - docker build -t jitesoft/node-base:$CI_COMMIT_REF_NAME -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$CI_COMMIT_REF_NAME . 
-    - docker login -u $HUB_USER -p $HUB_PW hub.docker.com
+    - docker login -u $HUB_USER -p $HUB_PW registry.hub.docker.io
     - docker push jitesoft/node-base:$CI_COMMIT_REF_NAME
     - docker logout
     - docker login -u gitlab-ci-token -p $GITLAB_CI_TOKEN registry.gitlab.com
