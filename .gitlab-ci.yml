@@ -1,12 +1,10 @@
 image: docker:latest
 
-before_script:
-  - TAG=$([[ "$CI_COMMIT_REF_NAME" = "master" ]] && echo "latest" || echo $CI_COMMIT_REF_NAME)
-  - echo $TAG
-  - docker info
-
 deploy:
   stage: deploy
+  before_script:
+    - TAG=$([[ "$CI_COMMIT_REF_NAME" = "master" ]] && echo "latest" || echo $CI_COMMIT_REF_NAME)
+    - echo $TAG
   script:
     - docker build -t jitesoft/node-base:$TAG -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG . 
     - docker login -u $HUB_USER -p $HUB_PW
