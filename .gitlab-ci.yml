@@ -1,4 +1,9 @@
-build:
+image: docker:latest
+
+before_script:
+  - docker info
+
+deploy:
   stage: deploy
   script:
     - docker build -t jitesoft/node-base:$CI_COMMIT_REF_NAME -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$CI_COMMIT_REF_NAME . 
