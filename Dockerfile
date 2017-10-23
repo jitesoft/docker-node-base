@@ -2,7 +2,7 @@ FROM alpine:3.6
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
 ADD ./gpgkeys.txt /gpgkeys.txt
-ARG NODE_VERSION="8.6.0"
+ARG NODE_VERSION="8.7.0"
 
 # This layer can be rebuilt from cache as long as the gpg keys have not changed.
 RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc \
