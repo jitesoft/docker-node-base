@@ -1,13 +1,12 @@
-FROM alpine:3.6
+FROM alpine:3.7
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
 ADD ./gpgkeys.txt /gpgkeys.txt
-ARG VERSION="9.3.0"
+ARG VERSION="8.9.3"
 ENV NODE_VERSION="${VERSION}"
 
-# This layer can be rebuilt from cache as long as the gpg keys have not changed.
-RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc \
-    && apk add --no-cache libstdc++ git g++ gcc wget make python openssl \
+RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \
+    && apk add --no-cache libstdc++ \
     && for key in `cat /gpgkeys.txt`; do \
         gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
         gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \

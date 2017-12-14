@@ -1,15 +1,68 @@
 image: docker:latest
 
-deploy:
+variables:
+  IMG_NAME: "jitesoft/node-base"
+
+latest:
   stage: deploy
-  before_script:
-    - TAG=$([[ "$CI_COMMIT_REF_NAME" = "master" ]] && echo "latest" || echo $CI_COMMIT_REF_NAME)
-    - echo $TAG
+  variables:
+    DOCKER_FILE: "full/latest/Dockerfile"
   script:
-    - docker build -t jitesoft/node-base:$TAG -t registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG . 
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
     - docker login -u $HUB_USER -p $HUB_PW
-    - docker push jitesoft/node-base:$TAG
+    - TAGS="${NODE} ${NODE_SHORT} latest"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
     - docker logout
-    - docker login -u gitlab-ci-token -p $GITLAB_CI_TOKEN registry.gitlab.com
-    - docker push registry.gitlab.com/jitesoft/dockerfiles/node-base:$TAG
+  only:
+    - master
+
+stable:
+  stage: deploy
+  variables:
+    DOCKER_FILE: "full/stable/Dockerfile"
+  script:
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
+    - docker login -u $HUB_USER -p $HUB_PW
+    - TAGS="${NODE} ${NODE_SHORT} stable"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
     - docker logout
+  only:
+    - master
+
+latest_slim:
+  stage: deploy
+  variables:
+    DOCKER_FILE: "slim/latest/Dockerfile"
+  script:
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
+    - docker login -u $HUB_USER -p $HUB_PW
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim latest-slim"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - docker logout
+  only:
+    - master
+
+stable_slim:
+  stage: deploy
+  variables:
+    DOCKER_FILE: "slim/stable/Dockerfile"
+  script:
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
+    - docker login -u $HUB_USER -p $HUB_PW
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim stable-slim"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - docker logout
+  only:
+    - master
