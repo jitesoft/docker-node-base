@@ -3,6 +3,12 @@ image: docker:latest
 variables:
   IMG_NAME: "jitesoft/node-base"
 
+before_script:
+  - docker login -u $HUB_USER -p $HUB_PW
+
+after_script:
+  - docker logout
+
 latest:
   stage: deploy
   variables:
@@ -12,10 +18,8 @@ latest:
     - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
     - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
     - NODE_SHORT="${NODE:0:1}"
-    - docker login -u $HUB_USER -p $HUB_PW
     - TAGS="${NODE} ${NODE_SHORT} latest"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-    - docker logout
   only:
     - master
 
@@ -28,10 +32,8 @@ stable:
     - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
     - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
     - NODE_SHORT="${NODE:0:1}"
-    - docker login -u $HUB_USER -p $HUB_PW
     - TAGS="${NODE} ${NODE_SHORT} stable"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-    - docker logout
   only:
     - master
 
@@ -44,10 +46,8 @@ latest_slim:
     - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
     - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
     - NODE_SHORT="${NODE:0:1}"
-    - docker login -u $HUB_USER -p $HUB_PW
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim latest-slim"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-    - docker logout
   only:
     - master
 
@@ -60,9 +60,7 @@ stable_slim:
     - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
     - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
     - NODE_SHORT="${NODE:0:1}"
-    - docker login -u $HUB_USER -p $HUB_PW
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim stable-slim"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-    - docker logout
   only:
     - master
