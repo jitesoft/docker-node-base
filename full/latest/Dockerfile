@@ -2,7 +2,7 @@ FROM alpine:3.7
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
 ADD ./gpgkeys.txt /gpgkeys.txt
-ARG VERSION="9.4.0"
+ARG VERSION="9.5.0"
 ENV NODE_VERSION="${VERSION}"
 
 RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc \
