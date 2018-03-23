@@ -6,9 +6,6 @@ variables:
 before_script:
   - docker login -u $HUB_USER -p $HUB_PW
 
-after_script:
-  - docker logout
-
 latest:
   stage: deploy
   variables:
