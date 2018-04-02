@@ -2,7 +2,7 @@ FROM alpine:3.7
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
 ADD ./gpgkeys.txt /gpgkeys.txt
-ARG VERSION="8.10.0"
+ARG VERSION="8.11.1"
 ENV NODE_VERSION="${VERSION}"
 
 RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \
