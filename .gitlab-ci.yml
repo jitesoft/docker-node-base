@@ -4,7 +4,7 @@ variables:
   IMG_NAME: "jitesoft/node-base"
 
 before_script:
-  - docker login -u $HUB_USER -p $HUB_PW
+  - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 
 latest:
   stage: deploy
