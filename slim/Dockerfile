@@ -1,9 +1,10 @@
-FROM registry.gitlab.com/jitesoft/dockerfiles/node-base:base
+FROM registry.gitlab.com/jitesoft/dockerfiles/node-base:shared
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
-ENV NODE_VERSION="${STABLE_VERSION}"
+ARG VERSION="unknown"
+ENV NODE_VERSION="${VERSION}"
 
-RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \
+RUN apk add --no-cache --virtual .trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \    
     && apk add --no-cache libstdc++ \
     && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}.tar.xz \
     && wget -q https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc \
@@ -17,6 +18,6 @@ RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g
     && cd .. \
     && rm -r node-v${NODE_VERSION} \
     && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc \
-    && apk del trash
+    && apk del .trash
 
 CMD [ "node" ]
