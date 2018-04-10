@@ -4,7 +4,7 @@ variables:
   IMG_NAME: "jitesoft/node-base"
 
 before_script:
-  - apk add --no-cache grep
+  - apk add --no-cache grep curl
   - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 
 latest:
@@ -12,7 +12,7 @@ latest:
   variables:
     DOCKER_FILE: "full/latest/Dockerfile"
   script:
-    - VERSION=$(wget -qO- https://nodejs.org/dist/latest/ | grep -oP "(?<=node-v)(([0-9]{0,3}\.){2}[0-9]{0,3})+" | head -1)
+    - VERSION=$(curl -s https://nodejs.org/dist/latest/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
     - echo "v ${VERSION}"
     - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
     - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
@@ -28,7 +28,7 @@ stable:
   variables:
     DOCKER_FILE: "full/stable/Dockerfile"
   script:
-    - VERSION=$(wget -qO- https://nodejs.org/dist/latest-v8.x/ | grep -oP "(?<=node-v)(([0-9]{0,3}\.){2}[0-9]{0,3})+" | head -1)
+    - VERSION=$(curl -s https://nodejs.org/dist/latest-v8.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
     - echo "v ${VERSION}"
     - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
     - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
@@ -45,7 +45,7 @@ latest_slim:
   variables:
     DOCKER_FILE: "slim/latest/Dockerfile"
   script:
-    - VERSION=$(wget -qO- https://nodejs.org/dist/latest/ | grep -oP "(?<=node-v)(([0-9]{0,3}\.){2}[0-9]{0,3})+" | head -1)
+    - VERSION=$(curl -s https://nodejs.org/dist/latest/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
     - echo "v ${VERSION}"
     - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
     - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
@@ -62,7 +62,7 @@ stable_slim:
   variables:
     DOCKER_FILE: "slim/stable/Dockerfile"
   script:
-    - VERSION=$(wget -qO- https://nodejs.org/dist/latest-v8.x/ | grep -oP "(?<=node-v)(([0-9]{0,3}\.){2}[0-9]{0,3})+" | head -1)
+    - VERSION=$(curl -s https://nodejs.org/dist/latest-v8.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
     - echo "v ${VERSION}"
     - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
     - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
