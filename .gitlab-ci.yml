@@ -3,73 +3,65 @@ image: docker:latest
 variables:
   IMG_NAME: "jitesoft/node-base"
 
-before_script:
-  - apk add --no-cache grep curl
-  - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+stages:
+  - build
+  - slim
+  - deploy
 
-latest:
+build:shared:
+  stage: build
+  variables:
+    DOCKER_FILE: "shared/Dockerfile"
+  before_script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} registry.gitlab.com
+  script:
+    - docker build -f ${DOCKER_FILE} .
+    - docker push ${CI_REGISTRY_IMAGE}:shared
+
+.build:slim: &slim_build
+  stage: slim
+  before_script:
+    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+  script:    
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BASE_TAGS}"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+
+build:slim:latest:
+  variables:
+    BASE_TAGS: "latest-slim"
+    DOCKER_FILE: "slim/latest/Dockerfile"
+  <<: *slim_build
+
+build:slim:stable:
+  variables:
+    BASE_TAGS: "stable-slim"
+    DOCKER_FILE: "slim/stable/Dockerfile"
+  <<: *slim_build
+
+.build:full: &full_build
   stage: deploy
+  before_script:
+    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+  script:
+    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
+    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
+    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
+    - NODE_SHORT="${NODE:0:1}"
+    - TAGS="${NODE} ${NODE_SHORT} ${BASE_TAGS}"
+    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+
+build:latest:
   variables:
     DOCKER_FILE: "full/latest/Dockerfile"
-  script:
-    - VERSION=$(curl -s https://nodejs.org/dist/latest/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
-    - echo "v ${VERSION}"
-    - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
-    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
-    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
-    - NODE_SHORT="${NODE:0:1}"
-    - TAGS="${NODE} ${NODE_SHORT} latest"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-  only:
-    - master
+    BASE_TAGS: "latest"
+  <<: *full_build
 
-stable:
-  stage: deploy
+build:stable:
   variables:
     DOCKER_FILE: "full/stable/Dockerfile"
-  script:
-    - VERSION=$(curl -s https://nodejs.org/dist/latest-v8.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
-    - echo "v ${VERSION}"
-    - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
-    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
-    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
-    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
-    - NODE_SHORT="${NODE:0:1}"
-    - TAGS="${NODE} ${NODE_SHORT} stable"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-  only:
-    - master
-
-latest_slim:
-  stage: deploy
-  variables:
-    DOCKER_FILE: "slim/latest/Dockerfile"
-  script:
-    - VERSION=$(curl -s https://nodejs.org/dist/latest/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
-    - echo "v ${VERSION}"
-    - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
-    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
-    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
-    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
-    - NODE_SHORT="${NODE:0:1}"
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim latest-slim"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-  only:
-    - master
-
-stable_slim:
-  stage: deploy
-  variables:
-    DOCKER_FILE: "slim/stable/Dockerfile"
-  script:
-    - VERSION=$(curl -s https://nodejs.org/dist/latest-v8.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1)
-    - echo "v ${VERSION}"
-    - BUILD=$(docker build --build-arg VERSION=${VERSION} -q -f ${DOCKER_FILE} .)
-    - BUILD=$(docker build -q -f ${DOCKER_FILE} .)
-    - NODE=$(docker inspect -f '{{range $index, $value := .Config.Env}}{{if eq (index (split $value "=") 0) "NODE_VERSION" }}{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}' ${BUILD})
-    - echo "Building for node v ${NODE}. The image build hash is ${BUILD}"
-    - NODE_SHORT="${NODE:0:1}"
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim stable-slim"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-  only:
-    - master
+    BASE_TAGS: "stable"
+  <<: *full_build

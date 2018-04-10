@@ -1,17 +1,10 @@
-FROM alpine:3.7
+FROM registry.gitlab.com/jitesoft/dockerfiles/node-base:base
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 
-ADD ./gpgkeys.txt /gpgkeys.txt
-ARG VERSION="8.11.1"
-ENV NODE_VERSION="${VERSION}"
+ENV NODE_VERSION="${STABLE_VERSION}"
 
 RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \
     && apk add --no-cache libstdc++ \
-    && for key in `cat /gpgkeys.txt`; do \
-        gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-        gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
-    done \
     && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}.tar.xz \
     && wget -q https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc \
     && gpg --batch --decrypt --output sha.txt SHASUMS256.txt.asc \
@@ -23,7 +16,7 @@ RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g
     && make install \
     && cd .. \
     && rm -r node-v${NODE_VERSION} \
-    && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc gpgkeys.txt \
+    && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc \
     && apk del trash
 
 CMD [ "node" ]

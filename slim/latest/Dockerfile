@@ -23,7 +23,7 @@ RUN apk add --no-cache --virtual trash autoconf gnupg linux-headers libgcc git g
     && make install \
     && cd .. \
     && rm -r node-v${NODE_VERSION} \
-    && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc gpgkeys.txt \
-    && apk del trash
+    && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc \
+    && apk del .trash
 
 CMD [ "node" ]
