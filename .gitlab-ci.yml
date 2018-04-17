@@ -2,7 +2,6 @@ image: docker:latest
 
 variables:
   IMG_NAME: "jitesoft/node-base"
-  GREP_ARG: (?<=${BUILD_TYPE}=)(([0-9]{0,3}(\.?)){3})
 
 stages:
   - build
@@ -11,12 +10,10 @@ stages:
 
 build:shared:
   stage: build
-  variables:
-    DOCKER_FILE: "shared/Dockerfile"
   before_script:
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} registry.gitlab.com
   script:
-    - docker build -t ${CI_REGISTRY_IMAGE}:shared -f ${DOCKER_FILE} --no-cache .
+    - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --no-cache .
     - docker push ${CI_REGISTRY_IMAGE}:shared
 
 .build:slim: &slim_build
@@ -27,6 +24,7 @@ build:shared:
     - docker pull ${CI_REGISTRY_IMAGE}:shared
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
   script:
+    - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared echo ${ENV_NAME} | sed 's/v/ /g')
     - NODE=$(docker inspect ${CI_REGISTRY_IMAGE}:shared | grep -oPm1 ${GREP_ARG})
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
@@ -37,15 +35,14 @@ build:shared:
 
 build:slim:latest:
   variables:
+    ENV_NAME: "LATEST_VERSION"
     BUILD_TYPE: "latest"
-    DOCKER_FILE: "slim/Dockerfile"
   <<: *slim_build
 
 build:slim:stable:
   variables:
+    ENV_NAME: "CURRENT_VERSION"
     BUILD_TYPE: "stable"
-    BASE_TAGS: "stable-slim"
-    DOCKER_FILE: "slim/Dockerfile"
   <<: *slim_build
 
 .build:full: &full_build
@@ -53,24 +50,22 @@ build:slim:stable:
   before_script:
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
     - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
+    - apk add --no-cache
   script:
-    - apk add --no-cache grep
-    - NODE=$(docker inspect jitesoft/node-base:${BUILD_TYPE}-slim | grep -oPm1 ${GREP_ARG})
+    - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE} node -v | sed 's/v/ /g')
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f ${DOCKER_FILE} --no-cache .)
+    - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
-    - TAGS="${NODE} ${NODE_SHORT} ${BASE_TAGS} ${BUILD_TYPE}"
+    - TAGS="${NODE} ${NODE_SHORT} ${BUILD_TYPE}"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:latest:
   variables:
     BUILD_TYPE: "latest"
-    DOCKER_FILE: "full/Dockerfile"
   <<: *full_build
 
 build:stable:
   variables:
     BUILD_TYPE: "stable"
-    DOCKER_FILE: "full/Dockerfile"
   <<: *full_build
