@@ -2,6 +2,7 @@ image: docker:latest
 
 variables:
   IMG_NAME: "jitesoft/node-base"
+  GREP_ARG: "(?<=${BUILD_TYPE}_version=)(([0-9]{0,3}(\.?)){3})"
 
 stages:
   - build
@@ -26,7 +27,7 @@ build:shared:
     - docker pull ${CI_REGISTRY_IMAGE}:shared
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
   script:
-    - NODE=$(docker inspect ${CI_REGISTRY_IMAGE}:shared | grep -oPm1 "(?<=${BUILD_TYPE}=)(([0-9]{0,3}(\.?)){3})")
+    - NODE=$(docker inspect ${CI_REGISTRY_IMAGE}:shared | grep -oPm1 ${GREP_ARG})
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f ${DOCKER_FILE} --no-cache .)
@@ -53,7 +54,8 @@ build:slim:stable:
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
     - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
   script:
-    - NODE=$(docker inspect jitesoft/node-base:${BUILD_TYPE}-slim | grep -oPm1 "(?<=${BUILD_TYPE}=)(([0-9]{0,3}(\.?)){3})")
+    - apk add --no-cache grep
+    - NODE=$(docker inspect jitesoft/node-base:${BUILD_TYPE}-slim | grep -oPm1 ${GREP_ARG})
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f ${DOCKER_FILE} --no-cache .)

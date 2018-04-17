@@ -4,7 +4,7 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>"
 ARG VERSION="unknown"
 ENV NODE_VERSION="${VERSION}"
 
-RUN apk add --no-cache --virtual .trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \    
+RUN apk add --no-cache --virtual .trash autoconf gnupg linux-headers libgcc git g++ gcc wget make python openssl \
     && apk add --no-cache libstdc++ \
     && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}.tar.xz \
     && wget -q https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc \
