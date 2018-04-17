@@ -2,7 +2,7 @@ image: docker:latest
 
 variables:
   IMG_NAME: "jitesoft/node-base"
-  GREP_ARG: "(?<=${BUILD_TYPE}_version=)(([0-9]{0,3}(\.?)){3})"
+  GREP_ARG: (?<=${BUILD_TYPE}=)(([0-9]{0,3}(\.?)){3})
 
 stages:
   - build
