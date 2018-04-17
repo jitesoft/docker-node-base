@@ -19,13 +19,12 @@ build:shared:
 .build:slim: &slim_build
   stage: slim
   before_script:
-    - apk add --no-cache grep
+    - apk add --no-cache sed
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} registry.gitlab.com
     - docker pull ${CI_REGISTRY_IMAGE}:shared
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
   script:
-    - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared echo ${ENV_NAME} | sed 's/v/ /g')
-    - NODE=$(docker inspect ${CI_REGISTRY_IMAGE}:shared | grep -oPm1 ${GREP_ARG})
+    - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared echo ${ENV_NAME}) | sed "s/v/ /g"
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f ${DOCKER_FILE} --no-cache .)
@@ -50,9 +49,9 @@ build:slim:stable:
   before_script:
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
     - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
-    - apk add --no-cache
+    - apk add --no-cache sed
   script:
-    - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE} node -v | sed 's/v/ /g')
+    - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE} node -v) | sed "s/v/ /g"
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
