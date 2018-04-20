@@ -27,10 +27,10 @@ build:shared:
     - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared env | grep ${ENV_NAME} | cut -d'=' -f2)
     - NODE_SHORT="${NODE:0:1}"
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f ${DOCKER_FILE} --no-cache .)
+    - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BUILD_TYPE}-slim"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - for tag in ${TAGS}; do docker tag ${BUILD} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:slim:latest:
   variables:
