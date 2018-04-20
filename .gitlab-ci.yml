@@ -29,17 +29,19 @@ build:shared:
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BUILD_TYPE}-slim"
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BUILD_TYPE}-slim ${EXTRA_TAGS}"
     - for tag in ${TAGS}; do docker tag ${BUILD} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:slim:latest:
   variables:
     BUILD_TYPE: "latest"
+    EXTRA_TAGS: ''
   <<: *slim_build
 
 build:slim:stable:
   variables:
     BUILD_TYPE: "stable"
+    EXTRA_TAGS: "lts-slim carbon-slim current-slim"
   <<: *slim_build
 
 .build:full: &full_build
@@ -54,7 +56,7 @@ build:slim:stable:
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
-    - TAGS="${NODE} ${NODE_SHORT} ${BUILD_TYPE}"
+    - TAGS="${NODE} ${NODE_SHORT} ${BUILD_TYPE} ${EXTRA_TAGS}"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:latest:
@@ -65,4 +67,5 @@ build:latest:
 build:stable:
   variables:
     BUILD_TYPE: "stable"
+    EXTRA_TAGS: "lts carbon current"
   <<: *full_build
