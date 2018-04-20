@@ -18,6 +18,7 @@ RUN apk add --no-cache --virtual .trash autoconf gnupg linux-headers libgcc git 
     && cd .. \
     && rm -r node-v${NODE_VERSION} \
     && rm node-v${NODE_VERSION}.tar.xz sha.txt SHASUMS256.txt.asc \
+    && rm -rf /tmp/* \
     && apk del .trash
 
 CMD [ "node" ]
