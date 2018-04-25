@@ -25,7 +25,7 @@ build:shared:
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
   script:
     - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared cat /tmp/${BUILD_TYPE}.txt)
-    - NODE_SHORT="${NODE:0:1}"
+    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
@@ -52,7 +52,7 @@ build:slim:stable:
     - apk add --no-cache grep
   script:
     - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE}-slim env | grep NODE_VERSION | cut -d'=' -f2)
-    - NODE_SHORT="${NODE:0:1}"
+    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
     - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
