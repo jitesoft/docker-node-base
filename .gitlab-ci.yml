@@ -41,7 +41,7 @@ build:slim:latest:
 build:slim:stable:
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: "lts-slim carbon-slim current-slim"
+    EXTRA_TAGS: "lts-slim carbon-slim"
   <<: *slim_build
 
 .build:full: &full_build
@@ -67,5 +67,5 @@ build:latest:
 build:stable:
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: "lts carbon current"
+    EXTRA_TAGS: "lts carbon"
   <<: *full_build
