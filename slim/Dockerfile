@@ -10,7 +10,7 @@ RUN apk add --no-cache --virtual .trash autoconf git g++ gcc curl make python \
             -OsS https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt \
             -OsS https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt.sig \
     && gpg --verify SHASUMS256.txt.sig SHASUMS256.txt \
-    && grep " node-v${NODE_VERSION}.tar.xz\$" nove-v${NODE_VERSION}.tar.xz | sha256sum -c - \
+    && grep " node-v${NODE_VERSION}.tar.xz\$" node-v${NODE_VERSION}.tar.xz | sha256sum -c - \
     && tar -xf node-v${NODE_VERSION}.tar.xz \
     && cd node-v${NODE_VERSION} \
     && ./configure \
