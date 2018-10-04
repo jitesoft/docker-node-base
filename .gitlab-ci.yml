@@ -12,7 +12,7 @@ stages:
 build:shared:
   stage: build
   before_script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} registry.gitlab.com
+    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
   script:
     - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --no-cache .
     - docker push ${CI_REGISTRY_IMAGE}:shared
@@ -21,9 +21,9 @@ build:shared:
   stage: slim
   before_script:
     - apk add --no-cache grep
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} registry.gitlab.com
+    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - docker pull ${CI_REGISTRY_IMAGE}:shared
-    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
   script:
     - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared cat /tmp/${BUILD_TYPE}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
@@ -48,7 +48,7 @@ build:slim:stable:
 .build:full: &full_build
   stage: full
   before_script:
-    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
     - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
     - apk add --no-cache grep
   script:
