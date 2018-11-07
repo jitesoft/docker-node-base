@@ -42,7 +42,7 @@ build:slim:latest:
 build:slim:stable:
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: "lts-slim carbon-slim"
+    EXTRA_TAGS: "lts-slim dubnium-slim"
   <<: *slim_build
 
 .build:full: &full_build
@@ -68,7 +68,7 @@ build:latest:
 build:stable:
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: "lts carbon"
+    EXTRA_TAGS: "lts dubnium"
   <<: *full_build
 
 trigger_build:
