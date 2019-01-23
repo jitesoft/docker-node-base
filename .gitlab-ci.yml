@@ -1,7 +1,8 @@
 image: docker:latest
-
 variables:
   IMG_NAME: "jitesoft/node-base"
+services:
+  - docker:dind
 
 stages:
   - build
