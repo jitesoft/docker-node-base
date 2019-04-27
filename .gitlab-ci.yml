@@ -14,8 +14,9 @@ build:shared:
   stage: build
   before_script:
     - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
+    - docker pull ${CI_REGISTRY_IMAGE:shared
   script:
-    - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --no-cache --network host .
+    - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --cache-from=${CI_REGISTRY_IMAGE}:shared .
     - docker push ${CI_REGISTRY_IMAGE}:shared
 
 .build:slim: &slim_build
@@ -29,7 +30,7 @@ build:shared:
     - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared cat /tmp/${BUILD_TYPE}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --network host --no-cache .)
+    - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BUILD_TYPE}-slim ${EXTRA_TAGS}"
     - for tag in ${TAGS}; do docker tag ${BUILD} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
@@ -56,7 +57,7 @@ build:slim:stable:
     - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE}-slim env | grep NODE_VERSION | cut -d'=' -f2)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --network host --no-cache .)
+    - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
     - echo "The image build hash is ${BUILD}"
     - TAGS="${NODE} ${NODE_SHORT} ${BUILD_TYPE} ${EXTRA_TAGS}"
     - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
