@@ -14,7 +14,7 @@ build:shared:
   stage: build
   before_script:
     - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
-    - docker pull ${CI_REGISTRY_IMAGE:shared
+    - docker pull ${CI_REGISTRY_IMAGE}:shared
   script:
     - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --cache-from=${CI_REGISTRY_IMAGE}:shared .
     - docker push ${CI_REGISTRY_IMAGE}:shared
