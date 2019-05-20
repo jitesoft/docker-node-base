@@ -50,7 +50,7 @@ download:tars:
   script:
     - |
       for VERSION in versions/*.txt; do
-        V=$(cat versions/${VERSION})
+        V=$(cat ${VERSION})
         curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz
         curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt
         curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig
