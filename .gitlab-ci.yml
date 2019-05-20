@@ -64,6 +64,10 @@ download:tars:
       - versions/*.tar.xz
       - versions/*.txt
     expire_in: 1 day
+  cache:
+    paths:
+      - /root/.gnupg/*
+    key: nodejs.gpg.keyring
 
 .build:slim: &slim_build
   stage: slim
