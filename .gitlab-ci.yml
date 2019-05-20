@@ -28,7 +28,7 @@ download:versions:
       done;
   artifacts:
     paths:
-      - vernsions/*.txt
+      - versions/*.txt
     expire_in: 1 day
 
 
