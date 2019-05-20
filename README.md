@@ -7,7 +7,7 @@ This image contains nothing but node.js and npm and is intended as a base image 
 
 ### Full builds
 
-* `11`, `latest`
+* `12`, `latest`
 * `10`, `stable`, `dubnium`
 
 ### Slim builds
@@ -15,11 +15,13 @@ This image contains nothing but node.js and npm and is intended as a base image 
 Due to adding a few core packages to the main branches of the image, two `slim` images have been introduced.  
 The slim images does not have `git g++ gcc wget make python openssl` packages installed hence decreasing the image size.
 
-* `11-slim`, `latest-slim`
+* `12-slim`, `latest-slim`
 * `10-slim`, `stable-slim`, `dubnium-slim`, `lts-slim`
 
 #### Old unmaintained images
 
+* `11`
+* `11-slim`
 * `8`, `carbon`
 * `8-slim`, `carbon-slim`
 
