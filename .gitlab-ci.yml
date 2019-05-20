@@ -51,9 +51,9 @@ download:tars:
     - |
       for VERSION in versions/*.txt; do
         V=$(cat ${VERSION})
-        curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz
-        curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt
-        curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig
+        curl -OsS https://nodejs.org/dist/v${V}/node-v${V}.tar.xz
+        curl -OsS https://nodejs.org/dist/v${V}/SHASUMS256.txt
+        curl -OsS https://nodejs.org/dist/v${V}/SHASUMS256.txt.sig
         gpg --verify SHASUMS256.txt.sig SHASUMS256.txt
         grep " node-v${V}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
         mv node-v${V}.tar.xz versions/node-v${V}.tar.xz
@@ -78,7 +78,7 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg VERSION=${NODE} -q -f slim/Dockerfile .
+    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg VERSION=${NODE} -f slim/Dockerfile .
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
     - for tag in ${TAGS}; do docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
@@ -106,7 +106,7 @@ build:slim:stable:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile .
+    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -f full/Dockerfile .
     - docker push ${IMG_NAME}:${BUILD_TYPE}
     - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
     - for tag in $TAGS; do docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
