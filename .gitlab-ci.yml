@@ -5,46 +5,89 @@ services:
   - docker:dind
 
 stages:
-  - build
+  - download
   - slim
   - full
   - notify
 
-build:shared:
-  stage: build
+download:versions:
+  stage: download
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  variables:
+    GIT_STRATEGY: none
+    NODE_VERSIONS: "(10, 12)"
   before_script:
-    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
-    - docker pull ${CI_REGISTRY_IMAGE}:shared
+    - apk add --no-cache curl
   script:
-    - docker build -t ${CI_REGISTRY_IMAGE}:shared -f shared/Dockerfile --cache-from=${CI_REGISTRY_IMAGE}:shared .
-    - docker push ${CI_REGISTRY_IMAGE}:shared
+    - |
+        for version in $VERSIONS; do \
+          curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1 > versions/version.txt \
+        done;
+  artifacts:
+    paths:
+      - vernsions/
+    expire_in: 1 day
+
+download:tars:
+  stage: download
+  variables:
+    GIT_STRATEGY: none
+  dependencies:
+    - download:versions
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  before_script:
+    - apk add --no-cache curl gnupg openssl linux-headers libgcc
+    - |
+        for key in `cat gpgkeys.txt`; do \
+          gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+          gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
+          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+        done
+  script:
+    - |
+        for v in versions/*.txt; do \
+          V=$(cat v);
+          curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz \
+          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt \
+          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig \
+          gpg --verify SHASUMS256.txt.sig SHASUMS245.txt \
+          grep " node-v${NODE_VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+          rm SHASUMS256.txt SHASUMS256.txt.sig \
+          mv node-v${V}.tar.xz versions/node-v${V}.tar.xz
+        done;
+  artifacts:
+    paths:
+      - versions/
+    expire_in: 1 day
 
 .build:slim: &slim_build
   stage: slim
+  dependencies:
+    - download:tars
   before_script:
     - apk add --no-cache grep
-    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
-    - docker pull ${CI_REGISTRY_IMAGE}:shared
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
   script:
-    - NODE=$(docker run --rm ${CI_REGISTRY_IMAGE}:shared cat /tmp/${BUILD_TYPE}.txt)
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg VERSION=${NODE} -q -f slim/Dockerfile --no-cache .)
-    - echo "The image build hash is ${BUILD}"
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${BUILD_TYPE}-slim ${EXTRA_TAGS}"
-    - for tag in ${TAGS}; do docker tag ${BUILD} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - docker build -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg VERSION=${NODE} -q -f slim/Dockerfile .
+    - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
+    - for tag in ${TAGS}; do docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:slim:latest:
   variables:
     BUILD_TYPE: "latest"
     EXTRA_TAGS: ''
+    NODE_VERSION: "12"
   <<: *slim_build
 
 build:slim:stable:
   variables:
     BUILD_TYPE: "stable"
     EXTRA_TAGS: "lts-slim dubnium-slim"
+    NODE_VERSION: "10"
   <<: *slim_build
 
 .build:full: &full_build
@@ -54,22 +97,24 @@ build:slim:stable:
     - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
     - apk add --no-cache grep
   script:
-    - NODE=$(docker run --rm jitesoft/node-base:${BUILD_TYPE}-slim env | grep NODE_VERSION | cut -d'=' -f2)
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - BUILD=$(docker build --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile --no-cache .)
-    - echo "The image build hash is ${BUILD}"
-    - TAGS="${NODE} ${NODE_SHORT} ${BUILD_TYPE} ${EXTRA_TAGS}"
-    - for tag in $TAGS; do docker tag $BUILD ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -q -f full/Dockerfile .
+    - docker push ${IMG_NAME}:${BUILD_TYPE}
+    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
+    - for tag in $TAGS; do docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
 
 build:latest:
   variables:
     BUILD_TYPE: "latest"
+    NODE_VERSION: "12"
   <<: *full_build
 
 build:stable:
   variables:
     BUILD_TYPE: "stable"
+    NODE_VERSION: "10"
     EXTRA_TAGS: "lts dubnium"
   <<: *full_build
 
