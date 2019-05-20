@@ -20,6 +20,7 @@ download:versions:
   before_script:
     - apk add --no-cache curl grep
   script:
+    - /bin/ash
     - mkdir versions
     - |
       for version in "${VERSIONS[@]}"; do
@@ -38,6 +39,7 @@ download:tars:
     - download:versions
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   before_script:
+    - /bin/ash
     - apk add --no-cache curl grep gnupg openssl linux-headers libgcc
     - |
       for key in `cat gpgkeys.txt`; do
@@ -46,6 +48,7 @@ download:tars:
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
       done
   script:
+    - /bin/ash
     - |
       for v in versions/*.txt; do
         V=$(cat v)
