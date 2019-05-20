@@ -13,14 +13,17 @@ stages:
 
 download:versions:
   stage: version
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  image:
+    name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+    entrypoint:
+      - /bin/ash
+      - -c
   variables:
     GIT_STRATEGY: none
     NODE_VERSIONS: ("10", "12")
   before_script:
     - apk add --no-cache curl grep
   script:
-    - /bin/ash
     - mkdir versions
     - |
       for version in "${VERSIONS[@]}"; do
@@ -37,9 +40,12 @@ download:tars:
     GIT_STRATEGY: none
   dependencies:
     - download:versions
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  image:
+    name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+    entrypoint:
+      - /bin/ash
+      - -c
   before_script:
-    - /bin/ash
     - apk add --no-cache curl grep gnupg openssl linux-headers libgcc
     - |
       for key in `cat gpgkeys.txt`; do
@@ -48,7 +54,6 @@ download:tars:
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
       done
   script:
-    - /bin/ash
     - |
       for v in versions/*.txt; do
         V=$(cat v)
