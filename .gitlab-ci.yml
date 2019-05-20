@@ -35,8 +35,6 @@ download:versions:
 
 download:tars:
   stage: download
-  variables:
-    GIT_STRATEGY: none
   dependencies:
     - download:versions
   image:
@@ -47,12 +45,12 @@ download:tars:
       for key in `cat gpgkeys.txt`; do
         gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
         gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
+        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
       done
   script:
     - |
-      for v in versions/*.txt; do
-        V=$(cat v)
+      for VERSION in versions/*.txt; do
+        V=$(cat versions/${VERSION})
         curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz
         curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt
         curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig
