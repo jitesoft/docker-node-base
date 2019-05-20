@@ -17,19 +17,21 @@ download:versions:
     name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   variables:
     GIT_STRATEGY: none
-    NODE_VERSIONS: ("10", "12")
+    NODE_VERSIONS: "10 12"
   before_script:
     - apk add --no-cache curl grep
   script:
     - mkdir versions
     - |
-      for version in "${VERSIONS[@]}"; do
-        /bin/ash -c "curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 \"(?<=node-v)(([0-9]{0,3}(\.?)){3})\" | tail -n 1 > versions/version.txt"
+      for version in NODE_VERSIONS; do
+        /bin/ash -c "curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 \"(?<=node-v)(([0-9]{0,3}(\.?)){3})\" | tail -n 1 > versions/${version}.txt"
       done;
   artifacts:
     paths:
       - vernsions/*.txt
     expire_in: 1 day
+
+
 
 download:tars:
   stage: download
@@ -39,8 +41,6 @@ download:tars:
     - download:versions
   image:
     name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-    entrypoint:
-      - /bin/ash
   before_script:
     - apk add --no-cache curl grep gnupg openssl linux-headers libgcc
     - |
