@@ -21,9 +21,9 @@ download:versions:
     - apk add --no-cache curl grep
   script:
     - |
-        for version in $VERSIONS; do \
-          curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1 > versions/version.txt \
-        done;
+         for version in $VERSIONS; do
+           curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1 > versions/version.txt
+         done;
   artifacts:
     paths:
       - vernsions/
@@ -39,21 +39,21 @@ download:tars:
   before_script:
     - apk add --no-cache curl gnupg openssl linux-headers libgcc
     - |
-        for key in `cat gpgkeys.txt`; do \
-          gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-          gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+        for key in `cat gpgkeys.txt`; do
+          gpg --keyserver pgp.mit.edu --recv-keys "$key" ||
+          gpg --keyserver keyserver.pgp.com --recv-keys "$key" ||
+          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
         done
   script:
     - |
-        for v in versions/*.txt; do \
-          V=$(cat v);
-          curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz \
-          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt \
-          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig \
-          gpg --verify SHASUMS256.txt.sig SHASUMS245.txt \
-          grep " node-v${NODE_VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-          rm SHASUMS256.txt SHASUMS256.txt.sig \
+        for v in versions/*.txt; do
+          V=$(cat v)
+          curl -OsS https://nodejs.org/dist/${V}/node-v${V}.tar.xz
+          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt
+          curl -OsS https://nodejs.org/dist/${V}/SHASUMS256.txt.sig
+          gpg --verify SHASUMS256.txt.sig SHASUMS245.txt
+          grep " node-v${NODE_VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
+          rm SHASUMS256.txt SHASUMS256.txt.sig
           mv node-v${V}.tar.xz versions/node-v${V}.tar.xz
         done;
   artifacts:
