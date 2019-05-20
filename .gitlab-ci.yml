@@ -26,7 +26,7 @@ download:versions:
          done;
   artifacts:
     paths:
-      - vernsions/
+      - vernsions/*.txt
     expire_in: 1 day
 
 download:tars:
@@ -40,8 +40,8 @@ download:tars:
     - apk add --no-cache curl gnupg openssl linux-headers libgcc
     - |
         for key in `cat gpgkeys.txt`; do
-          gpg --keyserver pgp.mit.edu --recv-keys "$key" ||
-          gpg --keyserver keyserver.pgp.com --recv-keys "$key" ||
+          gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+          gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
           gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
         done
   script:
@@ -58,7 +58,8 @@ download:tars:
         done;
   artifacts:
     paths:
-      - versions/
+      - versions/*.tar.xz
+      - versions/*.txt
     expire_in: 1 day
 
 .build:slim: &slim_build
