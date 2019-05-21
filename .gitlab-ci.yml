@@ -17,9 +17,9 @@ download:pgp:
     - apk add --no-cache gnupg linux-headers
   script:
     - |
-      if [ $REFRESH = "true"] || [ ! -f "keys.out" ]
-      echo "Refreshing GPG keyring."
+      if [ $REFRESH = "true"] || [ ! -f "keys.out" ];
       then
+        echo "Refreshing GPG keyring."
         for key in `cat gpgkeys.txt`; do
           gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
           gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
