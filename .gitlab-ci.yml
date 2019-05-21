@@ -17,7 +17,8 @@ download:pgp:
     - apk add --no-cache gnupg linux-headers
   script:
     - SUM=$(md5sum gpgkeys.txt)
-    - STORED=$(cat keysum.txt || "null")
+    - STORED="nothing"
+    - if [[ -e keysum.txt ]]; then STORED=$(cat keysum.txt); fi
     - |
       if [ $SUM -eq $STORED ]
       then
