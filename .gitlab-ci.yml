@@ -17,20 +17,26 @@ download:pgp:
     - apk add --no-cache gnupg linux-headers
   script:
     - |
-      if [ $REFRESH = "true"] || [ ! -f "keys.out" ];
+      SUM=$(md5sum gpgkeys.txt)
+      STORED=$(cat keysum.txt)
+      if [ $SUM -eq $STORED ]
       then
+        echo "Keys already imported."
+      else
         echo "Refreshing GPG keyring."
         for key in `cat gpgkeys.txt`; do
           gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
           gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
           gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
         done
+        gpg --export > keys.out
+        echo $SUM > keysum.txt
       fi
-    - gpg --export > keys.out
   cache:
     key: nodejs.gpg.keyring
     paths:
       - keys.out
+      - keysum.txt
   artifacts:
     paths:
       - keys.out
