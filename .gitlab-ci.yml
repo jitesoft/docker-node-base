@@ -16,6 +16,8 @@ download:pgp:
   before_script:
     - apk add --no-cache gnupg linux-headers
   script:
+    - cat keysum.txt
+    - md5sum gpgkeys.txt
     - |
       if [ "$(cat keysum.txt | md5sum -c)" ]
       then
