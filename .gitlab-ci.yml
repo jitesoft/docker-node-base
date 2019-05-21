@@ -30,7 +30,7 @@ download:pgp:
           gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
         done
         gpg --export > keys.out
-        md5sum gpgkeys.txt > keysum.txt
+        md5sum gpgkeys.txt | tee keysum.txt
       fi
   cache:
     key: nodejs.gpg.keyring
