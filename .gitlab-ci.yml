@@ -5,14 +5,39 @@ services:
   - docker:dind
 
 stages:
-  - version
+  - pre
   - download
   - slim
   - full
   - notify
 
+download:pgp:
+  stage: pre
+  before_script:
+    - apk add --no-cache gnupg linux-headers
+  script:
+    - |
+      if [ $REFRESH = "true"] || [ ! -f "keys.out" ]
+      echo "Refreshing GPG keyring."
+      then
+        for key in `cat gpgkeys.txt`; do
+          gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+          gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
+          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
+        done
+      fi
+    - gpg --export > keys.out
+  cache:
+    key: nodejs.gpg.keyring
+    paths:
+      - keys.out
+  artifacts:
+    paths:
+      - keys.out
+    expire_in: 1 day
+
 download:versions:
-  stage: version
+  stage: pre
   image:
     name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   variables:
@@ -26,27 +51,24 @@ download:versions:
       for version in $NODE_VERSIONS; do
         curl -s https://nodejs.org/dist/latest-v${version}.x/ 2>&1 | grep -oPm1 "(?<=node-v)(([0-9]{0,3}(\.?)){3})" | tail -n 1 > versions/${version}.txt
       done;
+  only:
+    refs:
+      - master
   artifacts:
     paths:
       - versions/*.txt
     expire_in: 1 day
 
-
-
 download:tars:
   stage: download
   dependencies:
     - download:versions
+    - download:pgp
   image:
     name: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   before_script:
     - apk add --no-cache curl grep gnupg openssl linux-headers libgcc
-    - |
-      for key in `cat gpgkeys.txt`; do
-        gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-        gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
-      done
+    - gpg --import keys.out
   script:
     - |
       for VERSION in versions/*.txt; do
@@ -58,15 +80,14 @@ download:tars:
         grep " node-v${V}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
         mv node-v${V}.tar.xz versions/node-v${V}.tar.xz
       done;
+  only:
+    refs:
+      - master
   artifacts:
     paths:
       - versions/*.tar.xz
       - versions/*.txt
     expire_in: 1 day
-  cache:
-    paths:
-      - /root/.gnupg/*
-    key: nodejs.gpg.keyring
 
 .build:slim: &slim_build
   stage: slim
@@ -82,6 +103,37 @@ download:tars:
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
     - for tag in ${TAGS}; do docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+  only:
+    refs:
+      - master
+
+.build:full: &full_build
+  stage: full
+  before_script:
+    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
+    - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
+  script:
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
+    - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
+    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -f full/Dockerfile .
+    - docker push ${IMG_NAME}:${BUILD_TYPE}
+    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
+    - for tag in $TAGS; do docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+  only:
+    refs:
+      - master
+
+trigger_build:
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  stage: notify
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
+  only:
+    refs:
+      - master
 
 build:slim:latest:
   variables:
@@ -97,20 +149,6 @@ build:slim:stable:
     NODE_VERSION: "10"
   <<: *slim_build
 
-.build:full: &full_build
-  stage: full
-  before_script:
-    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
-    - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
-  script:
-    - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -f full/Dockerfile .
-    - docker push ${IMG_NAME}:${BUILD_TYPE}
-    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
-    - for tag in $TAGS; do docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
-
 build:latest:
   variables:
     BUILD_TYPE: "latest"
@@ -123,11 +161,3 @@ build:stable:
     NODE_VERSION: "10"
     EXTRA_TAGS: "lts dubnium"
   <<: *full_build
-
-trigger_build:
-  image: alpine:latest
-  stage: notify
-  before_script:
-    - apk add --no-cache curl
-  script:
-    - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
