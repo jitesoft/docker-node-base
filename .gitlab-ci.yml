@@ -16,9 +16,9 @@ download:pgp:
   before_script:
     - apk add --no-cache gnupg linux-headers
   script:
+    - SUM=$(md5sum gpgkeys.txt)
+    - STORED=$(cat keysum.txt || "null")
     - |
-      SUM=$(md5sum gpgkeys.txt)
-      STORED=$(cat keysum.txt)
       if [ $SUM -eq $STORED ]
       then
         echo "Keys already imported."
