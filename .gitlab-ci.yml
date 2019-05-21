@@ -61,6 +61,8 @@ download:versions:
   only:
     refs:
       - master
+  retry:
+    max: 2
   artifacts:
     paths:
       - versions/*.txt
