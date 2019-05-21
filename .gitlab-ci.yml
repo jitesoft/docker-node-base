@@ -16,11 +16,8 @@ download:pgp:
   before_script:
     - apk add --no-cache gnupg linux-headers
   script:
-    - SUM=$(md5sum gpgkeys.txt)
-    - STORED="nothing"
-    - if [[ -e keysum.txt ]]; then STORED=$(cat keysum.txt); fi
     - |
-      if [ $SUM -eq $STORED ]
+      if [ "$(cat keysum.txt | md5sum -c)" ]
       then
         echo "Keys already imported."
       else
@@ -31,7 +28,7 @@ download:pgp:
           gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
         done
         gpg --export > keys.out
-        echo $SUM > keysum.txt
+        md5sum gpgkeys.txt > keysum.txt
       fi
   cache:
     key: nodejs.gpg.keyring
