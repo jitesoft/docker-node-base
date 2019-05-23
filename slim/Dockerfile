@@ -7,8 +7,7 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 ARG VERSION="unknown"
 ENV NODE_VERSION="${VERSION}"
 
-#COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
-COPY ./node-v12.3.1.tar.xz node.tar.xz
+COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
 RUN apk add --no-cache --virtual .trash autoconf git g++ gcc make python linux-headers libgcc \
     && apk add --no-cache libstdc++ \
     && tar -xf node.tar.xz \
