@@ -55,7 +55,7 @@ download:versions:
     - mkdir versions
     - |
       for version in $NODE_VERSIONS; do
-        wget -qO- https://nodejs.org/dist/latest-v${version}.x/ | grep -oPm1 "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | xargs echo $1 > versions/${version}.txt
+        wget -qO- https://nodejs.org/dist/latest-v12.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}' > versions/${version}.txt
       done;
   only:
     refs:
