@@ -102,15 +102,22 @@ download:tars:
   dependencies:
     - download:tars
   before_script:
+    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg VERSION=${NODE} -f slim/Dockerfile .
+    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE_SHORT} -f -q slim/Dockerfile .
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
-    - for tag in ${TAGS}; do docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - |
+      for tag in ${TAGS}; do
+        docker tag ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
+        docker push ${IMG_NAME}:${tag}
+        docker push ${CI_REGISTRY_IMAGE}:${tag}
+      done
   only:
     refs:
       - master
@@ -118,16 +125,22 @@ download:tars:
 .build:full: &full_build
   stage: full
   before_script:
+    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
-    - docker pull jitesoft/node-base:${BUILD_TYPE}-slim
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg BUILD_TYPE=${BUILD_TYPE} -f full/Dockerfile .
+    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg NODE_VERSION=${NODE_SHORT} -f -q full/Dockerfile .
     - docker push ${IMG_NAME}:${BUILD_TYPE}
     - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
-    - for tag in $TAGS; do docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}; docker push ${IMG_NAME}:${tag}; done
+    - |
+      for tag in ${TAGS}; do
+        docker tag ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
+        docker push ${IMG_NAME}:${tag}
+        docker push ${CI_REGISTRY_IMAGE}:${tag}
+      done
   only:
     refs:
       - master

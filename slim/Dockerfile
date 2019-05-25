@@ -4,8 +4,9 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
       maintainer.repo="https://gitlab.com/jitesoft/dockerfiles/node-base" \
       maintainer.issues="https://gitlab.com/jitesoft/dockerfiles/node-base/issues"
 
-ARG VERSION="unknown"
-ENV NODE_VERSION="${VERSION}"
+ARG NODE_VERSION="12"
+ENV NODE_VERSION="${NODE_VERSION}" \
+    PATH="$PATH:/node/bin"
 
 COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
 RUN apk add --no-cache --virtual .trash autoconf git g++ gcc make python linux-headers libgcc \
