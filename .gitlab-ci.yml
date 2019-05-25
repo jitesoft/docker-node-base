@@ -108,7 +108,7 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE_SHORT} -q -f slim/Dockerfile .
+    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -q -f slim/Dockerfile .
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
     - |
