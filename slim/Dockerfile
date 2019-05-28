@@ -13,9 +13,8 @@ RUN apk add --no-cache --virtual .trash autoconf git g++ gcc make python linux-h
     && apk add --no-cache libstdc++ \
     && tar -xf node.tar.xz \
     && cd node* \
-    && ./configure \
-    && getconf _NPROCESSORS_ONLN \
-    && make -j$(getconf _NPROCESSORS_ONLN) \
+    && ./configure --dest-os linux --dest-cpu x64 \
+    && make -j$(getconf _NPROCESSORS_ONLN) DESTCPU="x64" ARCH="x64" VARIATION="musl" V= \
     && make install -s \
     && cd .. \
     && rm -rf node \
