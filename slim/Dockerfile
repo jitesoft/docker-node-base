@@ -15,9 +15,9 @@ RUN START=`date +%s` \
  && tar -xf node.tar.xz \
  && cd node* \
  && ./configure --dest-os=linux --dest-cpu=x86_64 \
- && let JOBS="$(nproc) * 2" \
- && echo "${JOBS} parallel jobs." \
- && make -j$JOBS V= \
+ #&& let JOBS="$(nproc) * 2" \
+ #&& echo "${JOBS} parallel jobs." \
+ && make -j16 V= \
  && make install -s \
  && cd .. \
  && rm -rf node \
