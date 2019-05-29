@@ -12,7 +12,7 @@ COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
 RUN START=`date +%s` \
     # Used to check time it takes to run the full script.
  && apk add --no-cache --virtual .build-deps build-base git python linux-headers \
- && tar -xf node.tar.xz
+ && tar -xf node.tar.xz \
  && cd node* \
  && ./configure --dest-os=linux --dest-cpu=x86_64 \
  && let JOBS="$(nproc) * 2" \
