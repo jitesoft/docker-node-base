@@ -113,7 +113,6 @@ download:tars:
     - rm -rf versions
     - BUILD_DIR="$(pwd)/build"
     - cd node-v${FULL_VERSION}
-    - ls # debug...
     - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="${BUILD_DIR}" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - make -j V=
   artifacts:
@@ -184,18 +183,6 @@ trigger_build:
   only:
     refs:
       - master
-
-build:node:latest:
-  variables:
-    NODE_VERSION: "12"
-    GIT_STRATEGY: none
-  <<: *node_build
-
-build:node:stable:
-  variables:
-    NODE_VERSION: "10"
-    GIT_STRATEGY: none
-  <<: *node_build
 
 build:slim:latest:
   variables:
