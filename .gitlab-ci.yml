@@ -7,6 +7,7 @@ services:
 stages:
   - pre
   - download
+  - build
   - slim
   - full
   - notify
@@ -62,6 +63,7 @@ download:versions:
       - master
   retry:
     max: 2
+    key: nodejs-versions
   artifacts:
     paths:
       - versions/*.txt
@@ -96,6 +98,30 @@ download:tars:
       - versions/*.tar.xz
       - versions/*.txt
     expire_in: 1 day
+
+.build:node: &node_build
+  stage: build
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  dependencies:
+    - download:tars
+  before_script:
+    - apk add --no-cache git python build-base linux-headers
+  script:
+    - mkdir build node
+    - FULL_VERSION=$(cat ./versions/${NODE_VERSION}.txt)
+    - tar -xf ./versions/node-v${FULL_VERSION}.tar.xz -C ./node/
+    - cd node
+    - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="../build" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
+    - make -j V=
+  artifacts:
+    paths:
+      - build/
+    expire_in: 30 days
+  only:
+    refs:
+      - master
+  tags:
+    - jitesoft
 
 .build:slim: &slim_build
   stage: slim
@@ -155,6 +181,16 @@ trigger_build:
   only:
     refs:
       - master
+
+build:node:latest:
+  variables:
+    NODE_VERSION: "12"
+  <<: *node_build
+
+build:node:stable:
+  variables:
+    NODE_VERSION: "10"
+  <<: *node_build
 
 build:slim:latest:
   variables:
