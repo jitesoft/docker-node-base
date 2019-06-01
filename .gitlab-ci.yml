@@ -108,9 +108,11 @@ download:tars:
   script:
     - mkdir build node
     - FULL_VERSION=$(cat ./versions/${NODE_VERSION}.txt)
-    - tar -xf ./versions/node-v${FULL_VERSION}.tar.xz -C ./node/
-    - cd node
-    - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="../build" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
+    - tar -xf versions/node-v${FULL_VERSION}.tar.xz -C node/
+    - BUILD_DIR="$(pwd)/build"
+    - SRC_DIR="$(pwd)/node"
+    - cd ${SRC_DIR}
+    - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="${BUILD_DIR}" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - make -j V=
   artifacts:
     paths:
