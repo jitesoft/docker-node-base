@@ -188,11 +188,13 @@ trigger_build:
 build:node:latest:
   variables:
     NODE_VERSION: "12"
+    GIT_STRATEGY: none
   <<: *node_build
 
 build:node:stable:
   variables:
     NODE_VERSION: "10"
+    GIT_STRATEGY: none
   <<: *node_build
 
 build:slim:latest:
