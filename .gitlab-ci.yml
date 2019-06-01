@@ -110,10 +110,9 @@ download:tars:
     - FULL_VERSION=$(cat ./versions/${NODE_VERSION}.txt)
     - echo "Building node v ${FULL_VERSION}."
     - tar -xf versions/node-v${FULL_VERSION}.tar.xz
-    - rm -rf versions/node-v${FULL_VERSION}.tar.gz
+    - rm -rf versions
     - BUILD_DIR="$(pwd)/build"
-    - ls # debug...
-    - cd versions/node-v${FULL_VERSION}/
+    - cd node-v${FULL_VERSION}
     - ls # debug...
     - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="${BUILD_DIR}" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - make -j V=
