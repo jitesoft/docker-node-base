@@ -63,7 +63,6 @@ download:versions:
       - master
   retry:
     max: 2
-    key: nodejs-versions
   artifacts:
     paths:
       - versions/*.txt
