@@ -15,7 +15,7 @@ RUN START=`date +%s` \
  && tar -xf node.tar.xz \
  && cd node* \
  && ./configure --dest-os=linux --dest-cpu=x86_64 \
- && make -j -s \
+ && make -j4 -s \
  && make install -s \
  && cd .. \
  && rm -rf node \
