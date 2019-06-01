@@ -112,7 +112,9 @@ download:tars:
     - tar -xf versions/node-v${FULL_VERSION}.tar.xz
     - rm -rf versions/node-v${FULL_VERSION}.tar.gz
     - BUILD_DIR="$(pwd)/build"
-    - cd versions/node*
+    - ls # debug...
+    - cd versions/node-v${FULL_VERSION}/
+    - ls # debug...
     - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="${BUILD_DIR}" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - make -j V=
   artifacts:
