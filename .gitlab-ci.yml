@@ -98,33 +98,6 @@ download:tars:
       - versions/*.txt
     expire_in: 1 day
 
-.build:node: &node_build
-  stage: build
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  dependencies:
-    - download:tars
-  before_script:
-    - apk add --no-cache git python build-base linux-headers
-  script:
-    - mkdir build node
-    - FULL_VERSION=$(cat ./versions/${NODE_VERSION}.txt)
-    - echo "Building node v ${FULL_VERSION}."
-    - tar -xf versions/node-v${FULL_VERSION}.tar.xz
-    - rm -rf versions
-    - BUILD_DIR="$(pwd)/build"
-    - cd node-v${FULL_VERSION}
-    - ./configure --dest-os="linux" --dest-cpu="x86_64" --prefix="${BUILD_DIR}" --tag="${FULL_VERSION}-jitesoft" --fully-static --release-urlbase="https://gitlab.com/jitesoft/dockerfiles/node-base"
-    - make -j V=
-  artifacts:
-    paths:
-      - build/
-    expire_in: 30 days
-  only:
-    refs:
-      - master
-  tags:
-    - jitesoft
-
 .build:slim: &slim_build
   stage: slim
   dependencies:
@@ -141,7 +114,7 @@ download:tars:
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
     - |
       for tag in ${TAGS}; do
-        docker tag ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${CI_REGISTRY_IMAGE}:${tag}
         docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
         docker push ${IMG_NAME}:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
@@ -164,8 +137,8 @@ download:tars:
     - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
     - |
       for tag in ${TAGS}; do
-        docker tag ${CI_REGISTRY_IMAGE}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE} ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}
         docker push ${IMG_NAME}:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
       done
