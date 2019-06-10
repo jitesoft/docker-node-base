@@ -21,6 +21,5 @@ RUN apk add --no-cache --virtual .build-deps build-base git python linux-headers
  && apk del .build-deps \
  # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
- && npm cache clean \
  && rm -rf /tmp/* /node-v${NODE_VERSION}
 CMD [ "node" ]
