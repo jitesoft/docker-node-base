@@ -5,26 +5,22 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
       maintainer.issues="https://gitlab.com/jitesoft/dockerfiles/node-base/issues"
 
 ARG NODE_VERSION="12"
-ENV NODE_VERSION="${NODE_VERSION}" \
-    PATH="$PATH:/node/bin"
+ENV NODE_VERSION="${NODE_VERSION}"
 
 COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
-RUN START=`date +%s` \
-    # Used to check time it takes to run the full script.
- && apk add --no-cache --virtual .build-deps build-base git python linux-headers \
+RUN apk add --no-cache --virtual .build-deps build-base git python linux-headers openssl-dev zlib-dev \
  && tar -xf node.tar.xz \
+ && rm node.tar.xz \
  && cd node* \
- && ./configure --dest-os=linux --dest-cpu=x86_64 \
- && make -j4 -s \
+ && JOB_COUNT=$(($(nproc) * 2)) \
+ && echo "Running with ${JOB_COUNT} jobs paralell." \
+ && ./configure --shared-openssl --shared-zlib \
+ && make -j${JOB_COUNT} -s -i -l  \
  && make install -s \
  && cd .. \
- && rm -rf node \
- && rm node.tar.xz \
  && apk del .build-deps \
+ # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
- # Used to check time it takes to run the full script.
- && END=`date +%s` \
- && RUNTIME=$((END-START)) \
- && echo "it took ${RUNTIME} seconds to build."
-
-CMD [ "node/bin/node" ]
+ && npm cache clean \
+ && rm -rf ~/.node-gyp /tmp/* /node
+CMD [ "node" ]
