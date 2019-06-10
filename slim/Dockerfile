@@ -22,5 +22,5 @@ RUN apk add --no-cache --virtual .build-deps build-base git python linux-headers
  # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
  && npm cache clean \
- && rm -rf ~/.node-gyp /tmp/* /node
+ && rm -rf ~/.node-gyp /tmp/* /node*
 CMD [ "node" ]
