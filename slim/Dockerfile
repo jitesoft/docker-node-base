@@ -1,10 +1,14 @@
 FROM registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
-      maintainer.org="Jitesoft - https://jitesoft.com" \
-      maintainer.repo="https://gitlab.com/jitesoft/dockerfiles/node-base" \
-      maintainer.issues="https://gitlab.com/jitesoft/dockerfiles/node-base/issues"
-
 ARG NODE_VERSION="12"
+LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
+      maintainer.org="Jitesoft" \
+      maintainer.org.uri="https://jitesoft.com" \
+      com.jitesoft.project.repo.type="git" \
+      com.jitesoft.project.repo.uri="https://gitlab.com/jitesoft/dockerfiles/node-base" \
+      com.jitesoft.project.repo.issues="https://gitlab.com/jitesoft/dockerfiles/node-base/issues" \
+      com.jitesoft.project.registry.uri="registry.gitlab.com/jitesoft/dockerfiles/node-base" \
+      com.jitesoft.app.nodejs.version="${NODE_VERSION}"
+
 ENV NODE_VERSION="${NODE_VERSION}"
 
 COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz

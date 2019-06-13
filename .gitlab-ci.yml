@@ -110,7 +110,7 @@ download:tars:
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - TIME=`date +%s`
-    - docker build --label "nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
+    - docker build --label "com.jitesoft.app.nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
     - echo "Took $((`date +%s` - TIME))s"
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
