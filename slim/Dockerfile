@@ -12,7 +12,9 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 ENV NODE_VERSION="${NODE_VERSION}"
 
 COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
-RUN apk add --no-cache --virtual .build-deps build-base git python linux-headers openssl-dev zlib-dev \
+RUN addgroup -g 1000 node \
+ && adduser -u 1000 -G node -s /bin/sh -D node \
+ && apk add --no-cache --virtual .build-deps build-base git python linux-headers openssl-dev zlib-dev \
  && tar -xf node.tar.xz \
  && rm node.tar.xz \
  && cd node-v${NODE_VERSION} \
@@ -26,4 +28,5 @@ RUN apk add --no-cache --virtual .build-deps build-base git python linux-headers
  # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
  && rm -rf /tmp/* /node-v${NODE_VERSION}
+
 CMD [ "node" ]
