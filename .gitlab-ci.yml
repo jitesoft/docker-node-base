@@ -154,8 +154,14 @@ build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
+    - NODE=$(cat versions/12.txt)
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/slim/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --build-arg NODE_VERSION=12
+    - mkdir /cache
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/slim/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --build-arg NODE_VERSION="${NODE}" --cache=true --cache-dir=/cache
+  cache:
+    key: nodejs.build-cache
+    paths:
+      - /cache/
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
