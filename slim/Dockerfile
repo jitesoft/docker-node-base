@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:experimental
 FROM registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
 ARG NODE_VERSION="12"
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
@@ -11,13 +12,11 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 
 ENV NODE_VERSION="${NODE_VERSION}"
 
-COPY ./versions/node-v${NODE_VERSION}.tar.xz node.tar.xz
+COPY ./node-src/${NODE_VERSION} /node-src
 RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
- && apk add --no-cache --virtual .build-deps build-base git python linux-headers openssl-dev zlib-dev \
- && tar -xf node.tar.xz \
- && rm node.tar.xz \
- && cd node-v${NODE_VERSION} \
+ && apk add --no-cache --virtual .build-deps build-base git python linux-headers \
+ && cd node-src \
  && JOB_COUNT=$(($(nproc) * 2)) \
  && echo "Running with ${JOB_COUNT} jobs paralell." \
  && ./configure --shared-openssl --shared-zlib \
@@ -27,6 +26,6 @@ RUN addgroup -g 1000 node \
  && apk del .build-deps \
  # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
- && rm -rf /tmp/* /node-v${NODE_VERSION}
+ && rm -rf /tmp/* /node-src
 
 CMD [ "node" ]

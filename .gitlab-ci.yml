@@ -96,10 +96,34 @@ download:tars:
       - versions/*.txt
     expire_in: 1 day
 
+.build:node: &node_build
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine
+  stage: build
+  dependencies:
+    - download:tars
+  before_script:
+    - apk add --no-cache build-base git python linux-headers openssl-dev zlib-dev
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - mkdir node-src
+    - tar -Jxf versions/node-v${NODE_VERSION}.tar.xz -C node-src --strip-components=1
+    - cd node-src
+    - JOBS=$(($(nproc) * 2)
+    - echo "Running ${JOBS} parallel jobs."
+    - ./configure --fully-static --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.alpine"
+    - make -j${JOB_COUNT} -s -i -l V= 2>/dev/null | awk 'NR%20==0 {print NR,$0}'
+  artifacts:
+    paths:
+      - node-src/
+    expire_in: 10 days
+  cache:
+    paths:
+      - node-src/
+    key: node.build.cache-${NODE_VERSION}
+
 .build:slim: &slim_build
   stage: slim
   dependencies:
-    - download:tars
+    - .build:node
   before_script:
     - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
