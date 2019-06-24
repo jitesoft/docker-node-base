@@ -1,8 +1,6 @@
 image: registry.gitlab.com/jitesoft/dockerfiles/docker
 variables:
   IMG_NAME: "jitesoft/node-base"
-services:
-  - registry.gitlab.com/jitesoft/dockerfiles/docker/dind
 
 stages:
   - pre
@@ -103,6 +101,7 @@ download:tars:
     - download:tars
   before_script:
     - apk add --no-cache build-base git python linux-headers openssl-dev zlib-dev
+  script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - mkdir node-src
     - tar -Jxf versions/node-v${NODE_VERSION}.tar.xz -C node-src --strip-components=1
@@ -122,8 +121,8 @@ download:tars:
 
 .build:slim: &slim_build
   stage: slim
-  dependencies:
-    - .build:node
+  services:
+    - registry.gitlab.com/jitesoft/dockerfiles/docker/dind
   before_script:
     - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
@@ -149,6 +148,8 @@ download:tars:
 
 .build:full: &full_build
   stage: full
+  services:
+    - registry.gitlab.com/jitesoft/dockerfiles/docker/dind
   before_script:
     - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
     - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
@@ -170,23 +171,6 @@ download:tars:
     refs:
       - master
 
-build:
-  stage: slim
-  dependencies:
-    - download:tars
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - NODE=$(cat versions/12.txt)
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - mkdir /cache
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/slim/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --build-arg NODE_VERSION="${NODE}" --cache=true --cache-dir=/cache
-  cache:
-    key: nodejs.build-cache
-    paths:
-      - /cache/
-
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   stage: notify
@@ -198,7 +182,19 @@ trigger_build:
     refs:
       - master
 
+build:src:latest:
+  variables:
+    NODE_VERSION: "12"
+  <<: *node_build
+
+build:src:stable:
+  variables:
+    NODE_VERSION: "10"
+  <<: *node_build
+
 build:slim:latest:
+  dependencies:
+    - build:src:latest
   variables:
     BUILD_TYPE: "latest"
     EXTRA_TAGS: ''
@@ -206,6 +202,8 @@ build:slim:latest:
   <<: *slim_build
 
 build:slim:stable:
+  dependencies:
+    - build:src:stable
   variables:
     BUILD_TYPE: "stable"
     EXTRA_TAGS: "lts-slim dubnium-slim"
