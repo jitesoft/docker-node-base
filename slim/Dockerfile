@@ -19,7 +19,6 @@ RUN addgroup -g 1000 node \
  && cd node-src \
  && JOB_COUNT=$(($(nproc) * 2)) \
  && echo "Running with ${JOB_COUNT} jobs paralell." \
- && ./configure --shared-openssl --shared-zlib \
  && make -j${JOB_COUNT} -s -i -l V= 2>/dev/null | awk 'NR%20==0 {print NR,$0}' \
  && make install -s \
  && cd .. \
