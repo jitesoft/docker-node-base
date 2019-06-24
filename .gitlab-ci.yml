@@ -108,7 +108,7 @@ download:tars:
     - mkdir node-src
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
-    - ./configure --fully-static --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.alpine"
+    - ./configure --fully-static --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.alpine" --shared-openssl --shared-zlib
     - make -j4 -s -i V= 2>/dev/null | awk 'NR%20==0 {print NR,$0}'
   artifacts:
     paths:
