@@ -104,7 +104,7 @@ download:tars:
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - mkdir node-src
-    - tar -Jxf versions/node-v${NODE_VERSION}.tar.xz -C node-src --strip-components=1
+    - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     - JOBS=$(($(nproc) * 2)
     - echo "Running ${JOBS} parallel jobs."
