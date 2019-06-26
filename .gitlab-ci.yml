@@ -195,6 +195,7 @@ build:src:stable:
 build:slim:latest:
   dependencies:
     - build:src:latest
+    - download:versions
   variables:
     BUILD_TYPE: "latest"
     EXTRA_TAGS: ''
@@ -204,6 +205,7 @@ build:slim:latest:
 build:slim:stable:
   dependencies:
     - build:src:stable
+    - download:versions
   variables:
     BUILD_TYPE: "stable"
     EXTRA_TAGS: "lts-slim dubnium-slim"
