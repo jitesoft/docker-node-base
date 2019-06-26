@@ -105,9 +105,6 @@ download:tars:
 
 .build:binary: &node_binary
   stage: build
-  variables:
-    CC: "ccashe gcc"
-    CXX: "ccashe g++"
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine
   dependencies:
     - download:tars
@@ -117,6 +114,8 @@ download:tars:
     - if [ ! -d "/root/.ccache/" ]; then mkdir /root/.ccache; fi
     - mkdir -p node-src
   script:
+    - export CC="ccashe gcc"
+    - export CXX="ccashe g++"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - rm -rf /node.tar.xz
