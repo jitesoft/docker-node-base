@@ -134,6 +134,7 @@ download:tars:
     expire_in: 30 days
   tags:
     - jitesoft
+    - 4x64
 
 .build:slim: &slim_build
   stage: slim
@@ -163,7 +164,6 @@ download:tars:
       - master
   tags:
     - jitesoft
-    - k8s
 
 .build:full: &full_build
   stage: full
@@ -191,7 +191,6 @@ download:tars:
       - master
   tags:
     - jitesoft
-    - k8s
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
