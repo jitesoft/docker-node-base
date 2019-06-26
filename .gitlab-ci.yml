@@ -114,14 +114,14 @@ download:tars:
     - if [ ! -d "/root/.ccache/" ]; then mkdir /root/.ccache; fi
     - mkdir -p node-src
   script:
-    - export CCACHE_DIR="/root/.ccache"
+    - CCACHE_DIR="/root/.ccache"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - rm -rf /node.tar.xz
     - cd node-src
-    - export CC="ccache gcc"
-    - export CXX="ccache g++"
-    - make -j4 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base"
+    - CC="ccache gcc"
+    - CXX="ccache g++"
+    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>/dev/null | awk 'NR%20==0 {print NR,$0}'
     - mv node-*.tar.?z /out/
   cache:
     paths:
@@ -129,8 +129,7 @@ download:tars:
     key: node.build.ccache-${BUILD_TYPE}
   artifacts:
     paths:
-      - /out/node.tar.gz
-      - /out/node.tar.xz
+      - /out/*tar.*
     expire_in: 30 days
   tags:
     - jitesoft
