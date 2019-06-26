@@ -11,7 +11,7 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 
 ENV NODE_VERSION="${NODE_VERSION}"
 
-COPY ./node-src/${NODE_VERSION} /node-src
+COPY ./node-src /node-src
 RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .build-deps build-base git python linux-headers zlib-dev openssl-dev \
