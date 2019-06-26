@@ -105,7 +105,7 @@ download:tars:
     - apk add --no-cache build-base git python linux-headers openssl-dev zlib-dev
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - mkdir node-src
+    - if [ ! -d "node-src" ]; then mkdir node-src; fi
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     - ./configure --fully-static --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.alpine" --shared-openssl --shared-zlib
