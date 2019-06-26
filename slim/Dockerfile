@@ -11,16 +11,15 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 
 ENV NODE_VERSION="${NODE_VERSION}"
 
-COPY ./node-src /node-src
+COPY ./out/node.tar.xz /node.tar.xz
 RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
- && apk add --no-cache --virtual .build-deps build-base git python linux-headers zlib-dev openssl-dev \
- && cd node-src \
- && make install \
- && cd .. \
- && apk del .build-deps \
- # Install dependencies.
  && apk add --no-cache --virtual .node-deps libstdc++ \
- && rm -rf /tmp/* /node-src
+ && apk add --no-cache --virtual .install-deps tar xz \
+ && tar -Jxf /node.tar.xz -C /usr/local/ \
+ && apk del .install-deps \
+ && rm -f /node.tar.xz \
+ && node --version \
+ && npm version
 
 CMD [ "node" ]
