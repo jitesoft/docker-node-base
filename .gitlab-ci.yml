@@ -121,7 +121,7 @@ download:tars:
     - export CC="ccache gcc"
     - export CXX="ccache g++"
     - ./configure --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.musl"
-    - make -j$(getconf _NPROCESSORS_ONLN) binary V=
+    - make -j2 binary V=
     - mv node-*.tar.?z /out
   cache:
     paths:
