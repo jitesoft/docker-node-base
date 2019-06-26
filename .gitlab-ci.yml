@@ -125,7 +125,7 @@ download:tars:
     - mv node-*.tar.?z /out/
   cache:
     paths:
-      - /root/.ccache/*
+      - ~/.ccache/*
     key: node.build.ccache-${BUILD_TYPE}
   artifacts:
     paths:
@@ -204,12 +204,14 @@ trigger_build:
 
 build:src:latest:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
   <<: *node_binary
 
 build:src:stable:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
   <<: *node_binary
