@@ -109,7 +109,7 @@ download:tars:
   dependencies:
     - download:tars
   before_script:
-    - apk add --no-cache build-base git python linux-headers zlib-dev openssl-dev ccache libstdc++
+    - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
     - if [ ! -d "/out" ]; then mkdir /out; fi
     - if [ ! -d "/root/.ccache/" ]; then mkdir /root/.ccache; fi
     - mkdir -p node-src
