@@ -121,13 +121,13 @@ download:tars:
     - cd node-src
     - export CC="ccache gcc"
     - export CXX="ccache g++"
-    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" CUSTOMTAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base"
+    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - mv node-v${NODE}-linux-x64.tar.gz /out/node.tar.gz
     - mv node-v${NODE}-linux-x64.tar.xz /out/node.tar.xz
   cache:
     paths:
       - /root/.ccache/*
-    key: node.build.ccache-${NODE_VERSION}
+    key: node.build.ccache-${BUILD_TYPE}
   artifacts:
     paths:
       - /out/node.tar.gz
@@ -207,11 +207,13 @@ trigger_build:
 
 build:src:latest:
   variables:
+    BUILD_TYPE: "latest"
     NODE_VERSION: "12"
   <<: *node_binary
 
 build:src:stable:
   variables:
+    BUILD_TYPE: "stable"
     NODE_VERSION: "10"
   <<: *node_binary
 
