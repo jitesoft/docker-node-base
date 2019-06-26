@@ -121,7 +121,7 @@ download:tars:
     - cd node-src
     - export CC="ccache gcc"
     - export CXX="ccache g++"
-    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base"
+    - make -j4 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base"
     - mv node-*.tar.?z /out/
   cache:
     paths:
