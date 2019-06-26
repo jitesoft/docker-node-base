@@ -16,10 +16,7 @@ RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .build-deps build-base git python linux-headers zlib-dev openssl-dev \
  && cd node-src \
- && JOB_COUNT=$(($(nproc) * 2)) \
- && echo "Running with ${JOB_COUNT} jobs paralell." \
- && make -j${JOB_COUNT} -s -i -l V= 2>/dev/null | awk 'NR%20==0 {print NR,$0}' \
- && make install -s \
+ && make install \
  && cd .. \
  && apk del .build-deps \
  # Install dependencies.

@@ -118,6 +118,8 @@ download:tars:
     paths:
       - node-src/
     key: node.build.cache-${NODE_VERSION}
+  tags:
+    - jitesoft
 
 .build:slim: &slim_build
   stage: slim
