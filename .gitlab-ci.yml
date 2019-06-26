@@ -31,6 +31,9 @@ download:pgp:
         gpg --export > keys.out
         md5sum gpgkeys.txt | tee keysum.txt
       fi
+  tags:
+    - jitesoft
+    - k8s
   cache:
     key: nodejs.gpg.keyring
     paths:
@@ -58,6 +61,9 @@ download:versions:
   only:
     refs:
       - master
+  tags:
+    - jitesoft
+    - k8s
   retry:
     max: 2
   artifacts:
@@ -85,6 +91,9 @@ download:tars:
         grep " node-v${VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
         mv node-v${VERSION}.tar.xz versions/node-v${VERSION}.tar.xz
       done;
+  tags:
+    - jitesoft
+    - k8s
   only:
     refs:
       - master
@@ -93,6 +102,39 @@ download:tars:
       - versions/*.tar.xz
       - versions/*.txt
     expire_in: 1 day
+
+.build:binary: &node_binary
+  stage: build
+  variables:
+    CC: "ccashe gcc"
+    CXX: "ccashe g++"
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine
+  dependencies:
+    - download:tars
+  before_script:
+    - apk add --no-cache build-base git python linux-headers zlib-dev openssl-dev ccache libstdc++
+    - if [ ! -d "/out" ]; then mkdir /out; fi
+    - if [ ! -d "/root/.ccache/" ]; then mkdir /root/.ccache; fi
+    - mkdir -p node-src
+  script:
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
+    - rm -rf /node.tar.xz
+    - cd node-src
+    - ./configure --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.musl"
+    - make -j$(getconf _NPROCESSORS_ONLN) binary V=
+    - mv node-*.tar.?z /out
+  cache:
+    paths:
+      - /root/.ccache
+    key: node.build.ccache-${NODE_VERSION}
+  artifacts:
+    paths:
+      - out/
+    expire_in: 30 days
+  tags:
+    - jitesoft
+    - k8s
 
 .build:node: &node_build
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine
@@ -120,6 +162,7 @@ download:tars:
     key: node.build.cache-${NODE_VERSION}
   tags:
     - jitesoft
+    - k8s
 
 .build:slim: &slim_build
   stage: slim
@@ -147,6 +190,9 @@ download:tars:
   only:
     refs:
       - master
+  tags:
+    - jitesoft
+    - k8s
 
 .build:full: &full_build
   stage: full
@@ -172,6 +218,9 @@ download:tars:
   only:
     refs:
       - master
+  tags:
+    - jitesoft
+    - k8s
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
@@ -187,12 +236,12 @@ trigger_build:
 build:src:latest:
   variables:
     NODE_VERSION: "12"
-  <<: *node_build
+  <<: *node_binary
 
 build:src:stable:
   variables:
     NODE_VERSION: "10"
-  <<: *node_build
+  <<: *node_binary
 
 build:slim:latest:
   dependencies:
