@@ -118,9 +118,9 @@ download:tars:
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - rm -rf /node.tar.xz
     - cd node-src
+    - export CC="ccache gcc"
+    - export CXX="ccache g++"
     - ./configure --dest-os=linux --dest-cpu=x86_64 --tag="com.jitesoft.nodejs.musl"
-    - export CC="ccashe gcc"
-    - export CXX="ccashe g++"
     - make -j$(getconf _NPROCESSORS_ONLN) binary V=
     - mv node-*.tar.?z /out
   cache:
