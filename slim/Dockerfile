@@ -20,9 +20,7 @@ RUN addgroup -g 1000 node \
  && apk del .install-deps \
  && rm -rf /node.tar.xz \
  && apk del .install-deps \
- && chmod +x /usr/local/bin/node \
- && chmod +x /usr/local/bin/npm \
- && chmod +x /usr/local/bin/npx \
+ && chmod +x /usr/local/bin/* \
  && node --version \
  && npm version
 
