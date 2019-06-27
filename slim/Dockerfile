@@ -16,11 +16,13 @@ RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .node-deps libstdc++ \
  && apk add --no-cache --virtual .install-deps tar xz \
- && tar -Jxf /node.tar.xz -C /usr/local/ \
+ && tar -Jxf /node.tar.xz -C /usr/local/ --strip-components=1 \
  && apk del .install-deps \
  && rm -rf /node.tar.xz \
  && apk del .install-deps \
- && chmod +x /usr/local/bin/* \
+ && chmod +x /usr/local/bin/node \
+ && chmod +x /usr/local/bin/npm \
+ && chmod +x /usr/local/bin/npx \
  && node --version \
  && npm version
 
