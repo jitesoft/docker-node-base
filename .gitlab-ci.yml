@@ -1,3 +1,6 @@
+include:
+  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/container_scan.yml
+
 image: registry.gitlab.com/jitesoft/dockerfiles/docker
 variables:
   IMG_NAME: "jitesoft/node-base"
@@ -147,9 +150,7 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - TIME=`date +%s`
     - docker build --label "com.jitesoft.app.nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
-    - echo "Took $((`date +%s` - TIME))s"
     - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
     - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
     - |
@@ -251,3 +252,15 @@ build:stable:
     NODE_VERSION: "10"
     EXTRA_TAGS: "lts dubnium"
   <<: *full_build
+
+scan:stable:
+  stage: scan
+  extends: .container_scanning
+  variables:
+    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:10
+
+scan:latest:
+  stage: scan
+  extends: .container_scanning
+  variables:
+    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
