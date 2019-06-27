@@ -135,7 +135,6 @@ download:tars:
     expire_in: 30 days
   tags:
     - jitesoft
-    - 4x64
 
 .build:slim: &slim_build
   stage: slim
