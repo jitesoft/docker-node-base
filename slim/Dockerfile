@@ -18,7 +18,9 @@ RUN addgroup -g 1000 node \
  && apk add --no-cache --virtual .install-deps tar xz \
  && tar -Jxf /node.tar.xz -C /usr/local/ \
  && apk del .install-deps \
- && rm -f /node.tar.xz \
+ && rm -rf /node.tar.xz \
+ && apk del .install-deps \
+ && chmod +x /usr/local/bin/* \
  && node --version \
  && npm version
 
