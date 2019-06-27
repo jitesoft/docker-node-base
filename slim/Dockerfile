@@ -11,7 +11,7 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 
 ENV NODE_VERSION="${NODE_VERSION}"
 
-COPY ./out/node-v${NODE_VERSION}-linux-x64-musl.tar.xz /node.tar.xz
+COPY ./result/node-v${NODE_VERSION}-linux-x64-musl.tar.xz /node.tar.xz
 RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .node-deps libstdc++ \
