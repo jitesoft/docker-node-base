@@ -19,7 +19,6 @@ RUN addgroup -g 1000 node \
  && tar -Jxf /node.tar.xz -C /usr/local/ --strip-components=1 \
  && apk del .install-deps \
  && rm -rf /node.tar.xz \
- && apk del .install-deps \
  && chmod +x /usr/local/bin/* \
  && node --version \
  && npm version
