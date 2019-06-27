@@ -127,9 +127,13 @@ download:tars:
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
     - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee /out/build.log | awk 'NR%100==0 {print NR,$0}'
     - ccache -s
-    - ls -la
     - mv node-*.tar.?z /out
-    - ls -la /ccache
+    - echo "/root/.ccache"
+    - ls -la /root/.ccache
+    - echo "/out ==="
+    - ls -la /out
+    - echo "../ ==="
+    - ls -la ../
   cache:
     paths:
       - /root/.ccache
