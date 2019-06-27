@@ -10,7 +10,7 @@ stages:
   - full
   - notify
 
-download:pgp:
+import:pgp:
   stage: pre
   before_script:
     - apk add --no-cache gnupg linux-headers
@@ -44,7 +44,7 @@ download:pgp:
       - keys.out
     expire_in: 1 day
 
-download:versions:
+fetch:versions:
   stage: pre
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   variables:
@@ -111,11 +111,10 @@ download:tars:
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
     - mkdir -p node-src
   script:
+    - PATH="/usr/lib/ccache/bin:$PATH"
     - CCACHE_RECACHE="yes"
     - CCACHE_DIR="$(pwd)/ccache"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - CC="ccache gcc"
-    - CXX="ccache g++"
     - ccache -s
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
@@ -123,11 +122,8 @@ download:tars:
     - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs-v${NODE}-musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
+    - ccache -s > result/ccache.log
     - mv node-src/node-*.tar.?z result/
-    - echo "ccache ==="
-    - ls -la ccache
-    - echo "result ==="
-    - ls -la result
   cache:
     paths:
       - ccache/
@@ -135,8 +131,7 @@ download:tars:
   artifacts:
     paths:
       - result/*.log
-      - result/*.tar.xz
-      - result/*.tar.gz
+      - result/*.tar.*
     expire_in: 30 days
   tags:
     - jitesoft
