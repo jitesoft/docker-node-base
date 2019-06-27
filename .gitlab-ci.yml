@@ -119,7 +119,7 @@ download:tars:
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
-    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs-v${NODE}-musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
+    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
