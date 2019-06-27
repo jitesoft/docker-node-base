@@ -10,7 +10,7 @@ stages:
   - full
   - notify
 
-import:pgp:
+download:pgp:
   stage: pre
   before_script:
     - apk add --no-cache gnupg linux-headers
@@ -44,7 +44,7 @@ import:pgp:
       - keys.out
     expire_in: 1 day
 
-fetch:versions:
+download:versions:
   stage: pre
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   variables:
