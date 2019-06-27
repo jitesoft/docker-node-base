@@ -111,29 +111,34 @@ download:tars:
   before_script:
     - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
     - if [ ! -d "/out" ]; then mkdir /out; fi
-    - if [ ! -d "/ccache" ]; then mkdir /ccache; fi
+    - if [ ! -d "/root/.ccache" ]; then mkdir /root/.ccache; fi
     - mkdir -p node-src
   script:
-    - CCACHE_DIR="/ccache"
+    - CCACHE_RECACHE="yes"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - CC="ccache gcc"
+    - CXX="ccache g++"
+    - ccache -s
+    - echo "Current dir is '$(pwd)'"
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - rm -rf /node.tar.xz
     - cd node-src
-    - CC="ccache gcc"
-    - CXX="ccache g++"
-    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>/dev/null | awk 'NR%20==0 {print NR,$0}'
+    - echo "Current dir is '$(pwd)'"
+    # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
+    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" TAG="com.jitesoft.nodejs.musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee /out/build.log | awk 'NR%100==0 {print NR,$0}'
+    - ccache -s
     - ls -la
     - mv node-*.tar.?z /out
     - ls -la /ccache
-    - ls -la ~/
-    - if [ -d "~/.ccache" ]; then ls -la ~/.ccache; else echo "No ~/.ccache dir."; fi
   cache:
     paths:
-      - /ccache/*
+      - /root/.ccache
     key: node.build.ccache-${BUILD_TYPE}
   artifacts:
     paths:
-      - /out/*
+      - /out/*.log
+      - /out/*.tar.xz
+      - /out/*.tar.gz
     expire_in: 30 days
   tags:
     - jitesoft
