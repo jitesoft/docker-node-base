@@ -37,7 +37,6 @@ download:pgp:
       fi
   tags:
     - jitesoft
-    - k8s
   cache:
     key: nodejs.gpg.keyring
     paths:
@@ -94,7 +93,6 @@ download:tars:
       done;
   tags:
     - jitesoft
-    - k8s
   only:
     refs:
       - master
