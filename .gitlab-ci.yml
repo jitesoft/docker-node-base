@@ -184,9 +184,11 @@ download:tars:
     - |
       for tag in ${TAGS}; do
         docker tag ${IMG_NAME}:${BUILD_TYPE} ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE} jitesoft/node:${tag}
         docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}
         docker push ${IMG_NAME}:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
+        docker push jitesoft/node:${tag}
       done
   only:
     refs:
