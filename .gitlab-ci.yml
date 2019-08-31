@@ -140,11 +140,6 @@ download:tars:
 
 .build:slim: &slim_build
   stage: slim
-  services:
-    - registry.gitlab.com/jitesoft/dockerfiles/docker/dind
-  before_script:
-    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
-    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
@@ -169,11 +164,6 @@ download:tars:
 
 .build:full: &full_build
   stage: full
-  services:
-    - registry.gitlab.com/jitesoft/dockerfiles/docker/dind
-  before_script:
-    - echo ${CI_JOB_TOKEN} | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
-    - echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USER} --password-stdin
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
