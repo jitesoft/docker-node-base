@@ -151,10 +151,10 @@ download:tars:
       for tag in ${TAGS}; do
         docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${CI_REGISTRY_IMAGE}:${tag}
         docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim quay.io/jitesoft/node-slim:${tag}
+        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim quay.io/jitesoft/node:${tag}
         docker push ${IMG_NAME}:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
-        docker push quay.io/jitesoft/node-slim:${tag}
+        docker push quay.io/jitesoft/node:${tag}
       done
   only:
     refs:
