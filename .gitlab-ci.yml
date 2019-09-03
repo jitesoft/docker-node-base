@@ -1,10 +1,6 @@
 include:
   - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/container_scan.yml
 
-image: registry.gitlab.com/jitesoft/dockerfiles/docker
-variables:
-  IMG_NAME: "jitesoft/node-base"
-
 stages:
   - pre
   - download
@@ -16,6 +12,7 @@ stages:
 
 download:pgp:
   stage: pre
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   before_script:
     - apk add --no-cache gnupg linux-headers
   script:
@@ -104,7 +101,7 @@ download:tars:
 
 .build:binary: &node_binary
   stage: build
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   dependencies:
     - download:tars
   before_script:
@@ -140,19 +137,19 @@ download:tars:
 
 .build:slim: &slim_build
   stage: slim
+  image: registry.gitlab.com/jitesoft/dockerfiles/docker:latest
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build --label "com.jitesoft.app.nodejs.version=${NODE}" -t ${IMG_NAME}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
-    - docker push ${IMG_NAME}:${BUILD_TYPE}-slim
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS}"
+    - docker build --label "com.jitesoft.app.nodejs.version=${NODE}" -t ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
+    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS} ${BUILD_TYPE}-slim"
     - |
       for tag in ${TAGS}; do
-        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${CI_REGISTRY_IMAGE}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim ${IMG_NAME}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE}-slim quay.io/jitesoft/node:${tag}
-        docker push ${IMG_NAME}:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim jitesoft/node-base:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim quay.io/jitesoft/node:${tag}
+        docker push jitesoft/node-base:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
         docker push quay.io/jitesoft/node:${tag}
       done
@@ -163,23 +160,22 @@ download:tars:
     - jitesoft
 
 .build:full: &full_build
+  image: registry.gitlab.com/jitesoft/dockerfiles/docker:latest
   stage: full
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - echo "Building full image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build -t ${IMG_NAME}:${BUILD_TYPE} --build-arg NODE_VERSION=${NODE_SHORT} -f full/Dockerfile .
-    - docker push ${IMG_NAME}:${BUILD_TYPE}
-    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS}"
+    - docker build -t ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
+    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS} ${BUILD_TYPE}"
     - |
       for tag in ${TAGS}; do
-        docker tag ${IMG_NAME}:${BUILD_TYPE} ${CI_REGISTRY_IMAGE}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE} jitesoft/node:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE} ${IMG_NAME}:${tag}
-        docker tag ${IMG_NAME}:${BUILD_TYPE} quay.io/jitesoft/node:${tag}
-        docker push ${IMG_NAME}:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} ${CI_REGISTRY_IMAGE}:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} jitesoft/node:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} jitesoft/node-base:${tag}
+        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} quay.io/jitesoft/node:${tag}
         docker push ${CI_REGISTRY_IMAGE}:${tag}
         docker push jitesoft/node:${tag}
+        docker push jitesoft/node-base:${tag}
         docker push quay.io/jitesoft/node:${tag}
       done
   only:
@@ -221,7 +217,6 @@ build:slim:latest:
     - download:versions
   variables:
     BUILD_TYPE: "latest"
-    EXTRA_TAGS: ''
     NODE_VERSION: "12"
   <<: *slim_build
 
@@ -236,12 +231,16 @@ build:slim:stable:
   <<: *slim_build
 
 build:latest:
+  needs:
+    - build:slim:latest
   variables:
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
   <<: *full_build
 
 build:stable:
+  needs:
+    - build:slim:stable
   variables:
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
@@ -249,13 +248,19 @@ build:stable:
   <<: *full_build
 
 scan:stable:
+  needs:
+    - build:stable
   stage: scan
   extends: .container_scanning
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:10
+    GIT_STRATEGY: nonde
 
 scan:latest:
+  needs:
+    - build:latest
   stage: scan
   extends: .container_scanning
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
+    GIT_STRATEGY: nonde

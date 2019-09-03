@@ -5,32 +5,43 @@
 
 Docker image containing Node.js using Alpine Linux as base.  
 
+### Deprecation warning
+
+The full node images (the ones missing the`-slim` tag) will start being published to a new docker image (`jitesoft/node`).  
+This image was always intended as a base image, a small and stripped image. The `full-builds` tags will therefore be moved
+to the new image name.  
+
+The `latest` and `stable` images will be the full builds until jan 1 2020 while the new image will contain only the full builds. Please
+migrate to the new image as soon as possible to avoid any troublesome issues.  
+After 010120, this image will only update the none `-slim` tags, while the images will be the `slim` versions.
+
+
 ## Tags
 
 ### Docker Hub
 
 * `jitesoft/node`
-  * `12`, `latest`
-  * `10`, `stable`, `dubnium`
+    * `12`, `latest`
+    * `10`, `stable`, `dubnium`
 * `jitesoft/node-base`
-  * `12-slim`, `latest-slim`
-  * `10-slim`, `stable-slim`, `dubnium-slim`, `lts-slim`
+    * `12-slim`, `latest-slim`
+    * `10-slim`, `stable-slim`, `dubnium-slim`, `lts-slim`
 
 ### Quay.io
 
 * `quay.io/jitesoft/node`
-  * `12`, `latest`
-  * `10`, `stable`, `dubinum`
-  * `12-slim`, `latest-slim`
-  * `10-slim`, `latest-slim`, `dubinum-slim`
+    * `12`, `latest`
+    * `10`, `stable`, `dubinum`
+    * `12-slim`, `latest-slim`
+    * `10-slim`, `latest-slim`, `dubinum-slim`
 
 ### GitLab
 
 * `registry.gitlab.com/jitesoft/dockerfiles/node-base`
-  * `12`, `latest`
-  * `10`, `stable`, `dubinum`
-  * `12-slim`, `latest-slim`
-  * `10-slim`, `latest-slim`, `dubinum-slim`
+    * `12`, `latest`
+    * `10`, `stable`, `dubinum`
+    * `12-slim`, `latest-slim`
+    * `10-slim`, `latest-slim`, `dubinum-slim`
 
 ### Slim builds
 
@@ -47,16 +58,6 @@ Dockerfile can be found at  [GitLab](https://gitlab.com/jitesoft/dockerfiles/nod
 
 This image follows the [Jitesoft image label specification 1.0.0](https://gitlab.com/snippets/1866155).
 
-
-## Deprecation warning
-
-The full node images (the ones missing the`-slim` tag) will start being published to a new docker image (`jitesoft/node`).  
-This image was always intended as a base image, a small and stripped image. The `full-builds` tags will therefore be moved
-to the new image name.  
-
-The `latest` and `stable` images will be the full builds until jan 1 2020 while the new image will contain only the full builds. Please
-migrate to the new image as soon as possible to avoid any troublesome issues.  
-After 010120, this image will only update the none `-slim` tags, while the images will be the `slim` versions.
 
 ## Licenses
 
