@@ -212,7 +212,7 @@ build:src:stable:
   <<: *node_binary
 
 build:slim:latest:
-  dependencies:
+  needs:
     - build:src:latest
     - download:versions
   variables:
@@ -221,7 +221,7 @@ build:slim:latest:
   <<: *slim_build
 
 build:slim:stable:
-  dependencies:
+  needs:
     - build:src:stable
     - download:versions
   variables:
@@ -231,9 +231,8 @@ build:slim:stable:
   <<: *slim_build
 
 build:latest:
-  dependencies:
-    - download:versions
   needs:
+    - download:versions
     - build:slim:latest
   variables:
     BUILD_TYPE: "latest"
@@ -241,10 +240,9 @@ build:latest:
   <<: *full_build
 
 build:stable:
-  dependencies:
-    - download:versions
   needs:
     - build:slim:stable
+    - download:versions
   variables:
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
