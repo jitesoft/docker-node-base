@@ -231,6 +231,8 @@ build:slim:stable:
   <<: *slim_build
 
 build:latest:
+  dependencies:
+    - download:versions
   needs:
     - build:slim:latest
   variables:
@@ -239,6 +241,8 @@ build:latest:
   <<: *full_build
 
 build:stable:
+  dependencies:
+    - download:versions
   needs:
     - build:slim:stable
   variables:
