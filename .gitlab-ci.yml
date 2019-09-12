@@ -1,5 +1,5 @@
 include:
-  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/container_scan.yml
+  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/container_scan-v2.yml
 
 stages:
   - pre
@@ -252,17 +252,15 @@ build:stable:
 scan:stable:
   needs:
     - build:stable
-  stage: scan
   extends: .container_scanning
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:10
-    GIT_STRATEGY: nonde
+    GIT_STRATEGY: none
 
 scan:latest:
   needs:
     - build:latest
-  stage: scan
   extends: .container_scanning
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
-    GIT_STRATEGY: nonde
+    GIT_STRATEGY: none
