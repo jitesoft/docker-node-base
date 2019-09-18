@@ -118,7 +118,7 @@ download:tars:
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
-    - make -j2 binary V= DESTCPU="x64" ARCH="x64" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
+    - make -j3 binary V= DESTCPU="${ARCHITECTURE}" ARCH="${ARCHITECTURE}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
@@ -131,7 +131,7 @@ download:tars:
     paths:
       - result/*.log
       - result/*.tar.*
-    expire_in: 30 days
+    expire_in: 10 days
   tags:
     - jitesoft
 
@@ -201,6 +201,7 @@ build:src:latest:
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
+    ARCHITECTURE: "x64"
   <<: *node_binary
 
 build:src:stable:
@@ -209,6 +210,25 @@ build:src:stable:
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
+    ARCHITECTURE: "x64"
+  <<: *node_binary
+
+build:src:latest:arm64:
+  variables:
+    CCACHE_DIR: "/root/.ccache"
+    BUILD_TYPE: "latest-arm64"
+    NODE_VERSION: "12"
+    GIT_STRATEGY: "none"
+    ARCHITECTURE: "arm64"
+  <<: *node_binary
+
+build:src:stable:arm64:
+  variables:
+    CCACHE_DIR: "/root/.ccache"
+    BUILD_TYPE: "stable-arm64"
+    NODE_VERSION: "10"
+    GIT_STRATEGY: "none"
+    ARCHITECTURE: "arm64"
   <<: *node_binary
 
 build:slim:latest:
