@@ -102,6 +102,8 @@ download:tars:
 .build:binary: &node_binary
   stage: build
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  variables:
+    EXTRA_FLAGS: ""
   dependencies:
     - download:tars
   before_script:
@@ -118,7 +120,7 @@ download:tars:
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
-    - make -j3 binary V= DESTCPU="${ARCHITECTURE}" ARCH="${ARCHITECTURE}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
+    - make -j3 binary V= DESTCPU="${ARCHITECTURE}"${EXTRA_FLAGS} ARCH="${ARCHITECTURE}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" 2>&1 | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
@@ -134,30 +136,27 @@ download:tars:
     expire_in: 10 days
   tags:
     - jitesoft
+    - 4x64
 
 .build:slim: &slim_build
   stage: slim
-  image: registry.gitlab.com/jitesoft/dockerfiles/docker:latest
+  image: registry.gitlab.com/jitesoft/dockerfiles/docker/buildx:latest
+  before_script:
+    - wget https://gist.githubusercontent.com/Johannestegner/093e8053eabd795ed84b83e9610aed6b/raw/helper.sh -O helper
+    - chmod +x helper
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - docker build --label "com.jitesoft.app.nodejs.version=${NODE}" -t ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim --build-arg NODE_VERSION=${NODE} -f slim/Dockerfile .
-    - TAGS="${NODE}-slim ${NODE_SHORT}-slim ${EXTRA_TAGS} ${BUILD_TYPE}-slim"
-    - |
-      for tag in ${TAGS}; do
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim ${CI_REGISTRY_IMAGE}:${tag}
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim jitesoft/node-base:${tag}
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE}-slim quay.io/jitesoft/node:${tag}
-        docker push jitesoft/node-base:${tag}
-        docker push ${CI_REGISTRY_IMAGE}:${tag}
-        docker push quay.io/jitesoft/node:${tag}
-      done
+    - TAGS=$(./helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
+    - docker buildx build --platforms linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
   only:
     refs:
       - master
   tags:
     - jitesoft
+    - buildx
+    - amd64
 
 .build:full: &full_build
   image: registry.gitlab.com/jitesoft/dockerfiles/docker:latest
@@ -165,19 +164,8 @@ download:tars:
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - docker build -t ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-    - TAGS="${NODE} ${NODE_SHORT} ${EXTRA_TAGS} ${BUILD_TYPE}"
-    - |
-      for tag in ${TAGS}; do
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} ${CI_REGISTRY_IMAGE}:${tag}
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} jitesoft/node:${tag}
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} jitesoft/node-base:${tag}
-        docker tag ${CI_REGISTRY_IMAGE}:${BUILD_TYPE} quay.io/jitesoft/node:${tag}
-        docker push ${CI_REGISTRY_IMAGE}:${tag}
-        docker push jitesoft/node:${tag}
-        docker push jitesoft/node-base:${tag}
-        docker push quay.io/jitesoft/node:${tag}
-      done
+    - TAGS=$(./helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
+    - docker buildx build --platforms linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
   only:
     refs:
       - master
@@ -220,6 +208,7 @@ build:src:latest:arm64:
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "arm64"
+    EXTRA_FLAGS: " --cross-compile"
   <<: *node_binary
 
 build:src:stable:arm64:
@@ -229,6 +218,7 @@ build:src:stable:arm64:
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "arm64"
+    EXTRA_FLAGS: " --cross-compile"
   <<: *node_binary
 
 build:slim:latest:
@@ -246,7 +236,7 @@ build:slim:stable:
     - download:versions
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: "lts-slim dubnium-slim"
+    EXTRA_TAGS: "lts-slim,dubnium-slim,"
     NODE_VERSION: "10"
   <<: *slim_build
 
@@ -266,7 +256,7 @@ build:stable:
   variables:
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
-    EXTRA_TAGS: "lts dubnium"
+    EXTRA_TAGS: "lts,dubnium,"
   <<: *full_build
 
 scan:stable:
