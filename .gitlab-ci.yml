@@ -102,8 +102,6 @@ download:tars:
 .build:binary: &node_binary
   stage: build
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  variables:
-    EXTRA_FLAGS: ""
   dependencies:
     - download:tars
   before_script:
@@ -190,6 +188,7 @@ build:src:latest:
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "x64"
+    EXTRA_FLAGS: ""
   <<: *node_binary
 
 build:src:stable:
@@ -199,6 +198,7 @@ build:src:stable:
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "x64"
+    EXTRA_FLAGS: ""
   <<: *node_binary
 
 build:src:latest:arm64:
