@@ -176,6 +176,7 @@ trigger_build:
 
 build:src:latest:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
@@ -185,6 +186,7 @@ build:src:latest:
 
 build:src:stable:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
@@ -194,6 +196,7 @@ build:src:stable:
 
 build:src:latest:arm64:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest-arm64"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
@@ -203,6 +206,7 @@ build:src:latest:arm64:
 
 build:src:stable:arm64:
   variables:
+    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable-arm64"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
