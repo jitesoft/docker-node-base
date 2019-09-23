@@ -128,6 +128,8 @@ download:tars:
     expire_in: 10 days
   tags:
     - jitesoft
+    - ">4x64"
+    - ">8gb"
 
 .build:slim: &slim_build
   stage: slim
