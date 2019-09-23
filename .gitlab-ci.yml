@@ -24,7 +24,7 @@ download:pgp:
       for key in `cat gpgkeys.txt`; do
         gpg --list-keys ${key} || (gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
       done
-      gpg --export > keys.out
+    - gpg --export > keys.out
   tags:
     - jitesoft
   cache:
@@ -176,7 +176,6 @@ trigger_build:
 
 build:src:latest:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
@@ -186,7 +185,6 @@ build:src:latest:
 
 build:src:stable:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
@@ -196,23 +194,21 @@ build:src:stable:
 
 build:src:latest:arm64:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest-arm64"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "arm64"
-    EXTRA_FLAGS: " --cross-compile"
   <<: *node_binary
+  allow_failure: true
 
 build:src:stable:arm64:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable-arm64"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
     ARCHITECTURE: "arm64"
-    EXTRA_FLAGS: " --cross-compile"
   <<: *node_binary
+  allow_failure: true
 
 build:slim:latest:
   needs:
