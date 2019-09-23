@@ -17,10 +17,9 @@ download:pgp:
     - apk add --no-cache gnupg linux-headers
   script:
     - |
-      if [ -f keys.out ]
-      then
+      if [ -f keys.out ]; then
         echo "Keys exist... importing."
-        gpg --import keys.out
+        gpg --import keys.out 2>&1
       fi
     - |
       for key in `cat gpgkeys.txt`; do
