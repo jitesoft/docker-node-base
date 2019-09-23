@@ -16,29 +16,26 @@ download:pgp:
   before_script:
     - apk add --no-cache gnupg linux-headers
   script:
-    - cat keysum.txt
-    - md5sum gpgkeys.txt
     - |
-      if [ -f keysum.txt ] && [ "$(cat keysum.txt | md5sum -c)" ]
-      then
-        echo "Keys already imported."
-      else
-        echo "Refreshing GPG keyring."
-        for key in `cat gpgkeys.txt`; do
+      if [ -f keys.out ]
+        echo "Keys exist... importing."
+        gpg --import keys.out
+      fi
+    - |
+      for key in `cat gpgkeys.txt`; do
+        gpg --list-keys ${GPG_KEY} || ( \
           gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
           gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key";
-        done
-        gpg --export > keys.out
-        md5sum gpgkeys.txt | tee keysum.txt
-      fi
+          gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
+        )
+      done
+      gpg --export > keys.out
   tags:
     - jitesoft
   cache:
     key: nodejs.gpg.keyring
     paths:
       - keys.out
-      - keysum.txt
   artifacts:
     paths:
       - keys.out
