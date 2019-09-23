@@ -19,7 +19,7 @@ download:pgp:
     - cat keysum.txt
     - md5sum gpgkeys.txt
     - |
-      if [ "$(cat keysum.txt | md5sum -c)" ]
+      if [ -f keysum.txt ] && [ "$(cat keysum.txt | md5sum -c)" ]
       then
         echo "Keys already imported."
       else
