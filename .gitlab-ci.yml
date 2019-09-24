@@ -159,8 +159,6 @@ download:tars:
       - master
   tags:
     - jitesoft
-    - buildx
-    - amd64
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
@@ -193,7 +191,7 @@ build:src:stable:
     EXTRA_FLAGS: ""
   <<: *node_binary
 
-build:src:latest:arm64:
+.build:src:latest:arm64:
   variables:
     CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest-arm64"
@@ -203,7 +201,7 @@ build:src:latest:arm64:
   <<: *node_binary
   allow_failure: true
 
-build:src:stable:arm64:
+.build:src:stable:arm64:
   variables:
     CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable-arm64"
