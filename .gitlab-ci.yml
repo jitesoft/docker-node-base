@@ -140,7 +140,7 @@ download:tars:
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
     - TAGS=$(./helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
-    - docker buildx build --platforms linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
+    - docker buildx build --platform linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
   only:
     refs:
       - master
@@ -156,7 +156,7 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - TAGS=$(./helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
-    - docker buildx build --platforms linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
+    - docker buildx build --platform linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
   only:
     refs:
       - master
