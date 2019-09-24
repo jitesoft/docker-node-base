@@ -159,6 +159,8 @@ download:tars:
       - master
   tags:
     - jitesoft
+    - buildx
+    - amd64
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
