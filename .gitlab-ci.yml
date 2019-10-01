@@ -145,6 +145,7 @@ download:tars:
     - jitesoft
     - buildx
     - amd64
+    - arm64
 
 .build:full: &full_build
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
@@ -159,6 +160,9 @@ download:tars:
       - master
   tags:
     - jitesoft
+    - arm64
+    - amd64
+    - buildx
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
