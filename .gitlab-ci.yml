@@ -195,6 +195,7 @@ build:src:latest:
 
 build:src:stable:
   variables:
+    BUILD_TYPE: "stable"
     NODE_VERSION: "10"
   <<: *node_binary-amd64
 
@@ -213,6 +214,7 @@ build:src:stable:arm64:
 build:slim:latest:
   needs:
     - build:src:latest
+    - build:src:latest:arm64
     - download:versions
   variables:
     BUILD_TYPE: "latest"
@@ -222,6 +224,7 @@ build:slim:latest:
 build:slim:stable:
   needs:
     - build:src:stable
+    - build:src:stable:arm64
     - download:versions
   variables:
     BUILD_TYPE: "stable"
