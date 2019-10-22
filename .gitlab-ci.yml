@@ -97,13 +97,11 @@ download:tars:
   dependencies:
     - download:tars
   before_script:
-    - DOCKER_ARCH=amd64
-    - ARCHITECTURE=$(cat /etc/apk/arch)
-    - if [ "${ARCHITECTURE}" == "aarch64" ]; then DOCKER_ARCH=arm64; fi
+    - DOCKER_ARCH=x86_64
+    - if [ "$(cat /etc/apk/arch)" == "aarch64" ]; then DOCKER_ARCH=arm64; fi
     - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
-    - mkdir -p result/${DOCKER_ARCH}
+    - mkdir -p result/${DOCKER_ARCH} src
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
-    - mkdir -p node-src
   script:
     - PATH="/usr/lib/ccache/bin:$PATH"
     - CCACHE_RECACHE="yes"
@@ -113,7 +111,7 @@ download:tars:
     - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
     - cd node-src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
-    - make -j4 binary V= DESTCPU="${ARCHITECTURE}" ARCH="${ARCHITECTURE}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
+    - make -j4 binary V= DESTCPU="${DOCKER_ARCH}" ARCH="${DOCKER_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
@@ -193,27 +191,23 @@ build:src:latest:
   variables:
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
-    GIT_STRATEGY: "none"
   <<: *node_binary-amd64
 
 build:src:stable:
   variables:
     NODE_VERSION: "10"
-    GIT_STRATEGY: "none"
   <<: *node_binary-amd64
 
 build:src:latest:arm64:
   variables:
     BUILD_TYPE: "latest-arm64"
     NODE_VERSION: "12"
-    GIT_STRATEGY: "none"
   <<: *node_binary-aarch64
 
 build:src:stable:arm64:
   variables:
     BUILD_TYPE: "stable-arm64"
     NODE_VERSION: "10"
-    GIT_STRATEGY: "none"
   <<: *node_binary-aarch64
 
 build:slim:latest:
