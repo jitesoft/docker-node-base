@@ -108,14 +108,14 @@ download:tars:
     - CCACHE_DIR="$(pwd)/ccache"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - ccache -s
-    - tar -Jxf versions/node-v${NODE}.tar.xz -C node-src --strip-components=1
-    - cd node-src
+    - tar -Jxf versions/node-v${NODE}.tar.xz -C src --strip-components=1
+    - cd src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
     - make -j4 binary V= DESTCPU="${DOCKER_ARCH}" ARCH="${DOCKER_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
-    - mv node-src/node-*.tar.?z result/${DOCKER_ARCH}
+    - mv src/node-*.tar.?z result/${DOCKER_ARCH}
   cache:
     paths:
       - ccache/
