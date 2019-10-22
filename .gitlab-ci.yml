@@ -50,9 +50,9 @@ download:versions:
       for version in $NODE_VERSIONS; do
         wget -qO- https://nodejs.org/dist/latest-v${version}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}' > versions/${version}.txt
       done;
-  only:
-    refs:
-      - master
+#  only:
+#    refs:
+#      - master
   tags:
     - jitesoft
   artifacts:
@@ -82,23 +82,25 @@ download:tars:
       done;
   tags:
     - jitesoft
-  only:
-    refs:
-      - master
+#  only:
+#    refs:
+#      - master
   artifacts:
     paths:
       - versions/*.tar.xz
       - versions/*.txt
     expire_in: 1 day
 
-.build:binary: &node_binary
+.build:binary:
   stage: build
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   dependencies:
     - download:tars
   before_script:
+    - DOCKER_ARCH=amd64
+    - if [ "${ARCHITECTURE}" == "aarch64 ]; then DOCKER_ARCH=arm64; fi
     - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
-    - if [ ! -d "result" ]; then mkdir result; fi
+    - mkdir -p result/${DOCKER_ARCH}
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
     - mkdir -p node-src
   script:
@@ -114,20 +116,28 @@ download:tars:
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
-    - mv node-src/node-*.tar.?z result/
+    - mv node-src/node-*.tar.?z result/${DOCKER_ARCH}
   cache:
     paths:
       - ccache/
     key: node.build.ccache-${BUILD_TYPE}
   artifacts:
     paths:
-      - result/*.log
-      - result/*.tar.*
-    expire_in: 10 days
+      - result/
+    expire_in: 3 days
+
+.build:binary:amd64: &node_binary-amd64
+  extends: .build:binary
   tags:
     - jitesoft
     - ">4x64"
     - ">8gb"
+    - "arm64"
+
+.build:binary:aarch64: &node_binary-aarch64
+  extends: .build:binary
+  tags:
+    - "aarch64-native"
 
 .build:slim: &slim_build
   stage: slim
@@ -136,11 +146,12 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
-    - docker buildx build --platform linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
-  only:
-    refs:
-      - master
+#    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/test" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
+#  only:
+#    refs:
+#      - master
   tags:
     - jitesoft
     - buildx
@@ -153,18 +164,20 @@ download:tars:
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
-    - docker buildx build --platform linux/amd64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-  only:
-    refs:
-      - master
+    #- TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/test" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
+#  only:
+#    refs:
+#      - master
   tags:
     - jitesoft
     - arm64
     - amd64
     - buildx
 
-trigger_build:
+# TODO: Re-activate before merge.
+.trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   stage: notify
   before_script:
@@ -177,43 +190,36 @@ trigger_build:
 
 build:src:latest:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
-    ARCHITECTURE: "x64"
+    ARCHITECTURE: "x86_64"
     EXTRA_FLAGS: ""
-  <<: *node_binary
+  <<: *node_binary-amd64
 
 build:src:stable:
   variables:
-    CCACHE_DIR: "/root/.ccache"
-    BUILD_TYPE: "stable"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
-    ARCHITECTURE: "x64"
+    ARCHITECTURE: "x86_64"
     EXTRA_FLAGS: ""
-  <<: *node_binary
+  <<: *node_binary-amd64
 
-.build:src:latest:arm64:
+build:src:latest:arm64:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "latest-arm64"
     NODE_VERSION: "12"
     GIT_STRATEGY: "none"
-    ARCHITECTURE: "arm64"
-  <<: *node_binary
-  allow_failure: true
+    ARCHITECTURE: "aarch64"
+  <<: *node_binary-aarch64
 
-.build:src:stable:arm64:
+build:src:stable:arm64:
   variables:
-    CCACHE_DIR: "/root/.ccache"
     BUILD_TYPE: "stable-arm64"
     NODE_VERSION: "10"
     GIT_STRATEGY: "none"
-    ARCHITECTURE: "arm64"
-  <<: *node_binary
-  allow_failure: true
+    ARCHITECTURE: "aarch64"
+  <<: *node_binary-aarch64
 
 build:slim:latest:
   needs:
@@ -253,7 +259,7 @@ build:stable:
     EXTRA_TAGS: "lts,dubnium,"
   <<: *full_build
 
-scan:stable:
+.scan:stable:
   needs:
     - build:stable
   extends: .container_scanning
@@ -261,7 +267,7 @@ scan:stable:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:10
     GIT_STRATEGY: none
 
-scan:latest:
+.scan:latest:
   needs:
     - build:latest
   extends: .container_scanning
