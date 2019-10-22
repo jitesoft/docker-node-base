@@ -82,9 +82,9 @@ download:tars:
       done;
   tags:
     - jitesoft
-#  only:
-#    refs:
-#      - master
+  only:
+    refs:
+      - master
   artifacts:
     paths:
       - versions/*.tar.xz
@@ -103,9 +103,7 @@ download:tars:
     - mkdir -p result/${DOCKER_ARCH} src
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
   script:
-    - PATH="/usr/lib/ccache/bin:$PATH"
-    - CCACHE_RECACHE="yes"
-    - CCACHE_DIR="$(pwd)/ccache"
+    - export PATH="/usr/lib/ccache/bin:$PATH"
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - ccache -s
     - tar -Jxf versions/node-v${NODE}.tar.xz -C src --strip-components=1
@@ -191,24 +189,28 @@ build:src:latest:
   variables:
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-amd64
 
 build:src:stable:
   variables:
     BUILD_TYPE: "stable"
     NODE_VERSION: "10"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-amd64
 
 build:src:latest:arm64:
   variables:
     BUILD_TYPE: "latest-arm64"
     NODE_VERSION: "12"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-aarch64
 
 build:src:stable:arm64:
   variables:
     BUILD_TYPE: "stable-arm64"
     NODE_VERSION: "10"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-aarch64
 
 build:slim:latest:
