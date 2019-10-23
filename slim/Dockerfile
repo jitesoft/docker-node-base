@@ -9,7 +9,9 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
       com.jitesoft.project.registry.uri="registry.gitlab.com/jitesoft/dockerfiles/node-base" \
       com.jitesoft.app.nodejs.version="${NODE_VERSION}"
 
+ARG TARGETARCH
 ARG NODE_VERSION
+
 COPY ./result/${TARGETARCH}/node-v${NODE_VERSION}-linux-${TARGETARCH}-musl.tar.xz /node.tar.xz
 RUN addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
