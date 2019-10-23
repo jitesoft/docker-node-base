@@ -97,7 +97,7 @@ download:tars:
   dependencies:
     - download:tars
   before_script:
-    - DOCKER_ARCH=x86_64
+    - DOCKER_ARCH=amd64
     - if [ "$(cat /etc/apk/arch)" == "aarch64" ]; then DOCKER_ARCH=arm64; fi
     - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
     - mkdir -p result/${DOCKER_ARCH} src
