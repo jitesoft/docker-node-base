@@ -114,7 +114,7 @@ download:tars:
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
-    - mv src/node-v${NODE}-linux-${BUILD_ARCH}-musl.tar.xz result/node-v${NODE}-linux-${DOCKER_ARCH}-musl.tar.gz
+    - mv src/node-v${NODE}-linux-${BUILD_ARCH}-musl.tar.xz result/node-v${NODE}-linux-${DOCKER_ARCH}-musl.tar.xz
   cache:
     paths:
       - ccache/
