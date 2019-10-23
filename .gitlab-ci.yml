@@ -82,9 +82,9 @@ download:tars:
       done;
   tags:
     - jitesoft
-  only:
-    refs:
-      - master
+#  only:
+#    refs:
+#      - master
   artifacts:
     paths:
       - versions/*.tar.xz
