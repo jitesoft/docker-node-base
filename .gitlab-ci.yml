@@ -50,9 +50,9 @@ download:versions:
       for version in $NODE_VERSIONS; do
         wget -qO- https://nodejs.org/dist/latest-v${version}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}' > versions/${version}.txt
       done;
-#  only:
-#    refs:
-#      - master
+  only:
+    refs:
+      - master
   tags:
     - jitesoft
   artifacts:
@@ -82,9 +82,9 @@ download:tars:
       done;
   tags:
     - jitesoft
-#  only:
-#    refs:
-#      - master
+  only:
+    refs:
+      - master
   artifacts:
     paths:
       - versions/*.tar.xz
@@ -144,12 +144,13 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-#    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/test" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
     - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
-#  only:
-#    refs:
-#      - master
+    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}-slim
+    - TAGS=$(helper taglist "quay.io/jitesoft/node" "${NODE}-slim,${NODE_SHORT}-slim,${EXTRA_TAGS}${BUILD_TYPE}-slim")
+  only:
+    refs:
+      - master
   tags:
     - jitesoft
     - buildx
@@ -162,20 +163,20 @@ download:tars:
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    #- TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/test" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
     - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-#  only:
-#    refs:
-#      - master
+    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
+    - TAGS=$(helper taglist "quay.io/jitesoft/node" "${NODE},${NODE_SHORT},${EXTRA_TAGS}${BUILD_TYPE}")
+  only:
+    refs:
+      - master
   tags:
     - jitesoft
     - arm64
     - amd64
     - buildx
 
-# TODO: Re-activate before merge.
-.trigger_build:
+trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   stage: notify
   before_script:
@@ -222,6 +223,7 @@ build:slim:latest:
   variables:
     BUILD_TYPE: "latest"
     NODE_VERSION: "13"
+    EXTRA_TAGS: ""
   <<: *slim_build
 
 build:slim:stable:
@@ -240,6 +242,7 @@ build:latest:
     - download:versions
     - build:slim:latest
   variables:
+    EXTRA_TAGS: ""
     BUILD_TYPE: "latest"
     NODE_VERSION: "12"
   <<: *full_build
@@ -254,7 +257,7 @@ build:stable:
     EXTRA_TAGS: "lts,erbium,"
   <<: *full_build
 
-.scan:stable:
+scan:stable:
   needs:
     - build:stable
   extends: .container_scanning
@@ -262,7 +265,7 @@ build:stable:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
     GIT_STRATEGY: none
 
-.scan:latest:
+scan:latest:
   needs:
     - build:latest
   extends: .container_scanning
