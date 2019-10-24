@@ -15,34 +15,50 @@ The `latest` and `stable` images will be the full builds until jan 1 2020 while 
 migrate to the new image as soon as possible to avoid any troublesome issues.  
 After 010120, this image will only update the none `-slim` tags, while the images will be the `slim` versions.
 
+Since release of v13 and LTS release of v12, the images are built for both amd64 and aarch64.
 
 ## Tags
 
 ### Docker Hub
 
 * `jitesoft/node`
-    * `12`, `latest`
-    * `10`, `stable`, `dubnium`
+    * `13`, `latest`
+    * `12`, `stable`, `erbium`
 * `jitesoft/node-base`
-    * `12-slim`, `latest-slim`
-    * `10-slim`, `stable-slim`, `dubnium-slim`, `lts-slim`
+    * `13-slim`, `latest-slim`
+    * `12-slim`, `stable-slim`, `lts-slim`, `erbium-slim`
+    
+Unmaintained:
+
+* `10`, `dubnium`
+* `10-slim`, `dubnium-slim`
 
 ### Quay.io
 
 * `quay.io/jitesoft/node`
-    * `12`, `latest`
-    * `10`, `stable`, `dubinum`
-    * `12-slim`, `latest-slim`
-    * `10-slim`, `latest-slim`, `dubinum-slim`
+    * `13`, `latest`
+    * `12`, `erbium`, `stable`
+    * `13-slim`, `latest-slim`
+    * `12-slim`, `stable-slim`, `erbium-slim`
+
+Unmaintained:
+
+* `10`, `dubinum`
+* `10-slim`, `dubinum-slim`
 
 ### GitLab
 
 * `registry.gitlab.com/jitesoft/dockerfiles/node-base`
-    * `12`, `latest`
-    * `10`, `stable`, `dubinum`
-    * `12-slim`, `latest-slim`
-    * `10-slim`, `latest-slim`, `dubinum-slim`
+    * `13`, `latest`
+    * `12`, `stable`, `erbium`
+    * `13-slim`, `latest-slim`
+    * `12-slim`, `stable-slim` `erbium-slim`
 
+Unmaintained:
+
+* `10`,  `dubinum`
+* `10-slim`, `dubinum-slim`
+    
 ### Slim builds
 
 The images suffixed with `slim` are a stripped version of the image, the none `slim` images contains common tools - for 
