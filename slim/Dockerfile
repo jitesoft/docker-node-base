@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 FROM registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
 ARG NODE_VERSION
 LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
@@ -12,12 +13,12 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
 ARG TARGETARCH
 ARG NODE_VERSION
 
-COPY ./result/node-v${NODE_VERSION}-linux-${TARGETARCH}-musl.tar.xz /node.tar.xz
-RUN addgroup -g 1000 node \
+RUN --mount=type=bind,source=./result,target=/tmp \
+ addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .node-deps libstdc++ \
  && apk add --no-cache --virtual .install-deps tar xz \
- && tar -Jxf /node.tar.xz -C /usr/local/ --strip-components=1 \
+ && tar -Jxf /tmp/node-v${NODE_VERSION}-linux-${TARGETARCH}-musl.tar.xz -C /usr/local/ --strip-components=1 \
  && apk del .install-deps \
  && rm -rf /node.tar.xz \
  && chmod +x /usr/local/bin/* \
