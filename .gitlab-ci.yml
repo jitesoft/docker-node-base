@@ -130,12 +130,12 @@ download:tars:
     - jitesoft
     - ">4x64"
     - ">8gb"
-    - "arm64"
+    - "native-amd64"
 
 .build:binary:aarch64: &node_binary-aarch64
   extends: .build:binary
   tags:
-    - "aarch64-native"
+    - "native-aarch64"
 
 .build:slim: &slim_build
   stage: slim
@@ -159,8 +159,7 @@ download:tars:
   tags:
     - jitesoft
     - buildx
-    - amd64
-    - arm64
+    - protected
 
 .build:full: &full_build
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
@@ -182,9 +181,8 @@ download:tars:
       - master
   tags:
     - jitesoft
-    - arm64
-    - amd64
     - buildx
+    - protected
 
 build:src:latest:
   variables:
