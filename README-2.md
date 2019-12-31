@@ -6,11 +6,11 @@
 Docker image containing Node.js, using alpine linux as base.  
 This image includes packages which are used to build common node packages:  
 `gcc`, `g++`, `curl`, `wget`, `openssl`, `python` and `make`.  
-If you are looking for a version without the above packages, use the `jitesoft/node-base:*-slim` image.
+If you are looking for a version without the above packages, use the [`jitesoft/node-base`](https://hub.docker.com/repository/docker/jitesoft/node-base) image.
 
 ## Tags
 
-The following tags are updated on a weekly schedule and built for x86_64 and aarch64.
+The following tags are updated on a weekly schedule and built for amd64 and arm64.
 
 ### Docker Hub
 
@@ -19,7 +19,7 @@ The following tags are updated on a weekly schedule and built for x86_64 and aar
 
 ### GitLab
 
-* `registry.gitlab.com/jitesoft/dockerfiles/node-base`
+* `registry.gitlab.com/jitesoft/dockerfiles/node-base/full`
     * `13`, `latest`
     * `12`, `stable`, `erbium`
 

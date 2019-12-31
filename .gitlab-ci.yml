@@ -144,14 +144,14 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE}-slim,${NODE_SHORT}-slim,${BUILD_TYPE}-slim${EXTRA_TAGS}")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}{EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
-    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}-slim
+    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
     - |
-      for tag in $(echo "${NODE}-slim,${NODE_SHORT}-slim,${BUILD_TYPE}-slim${EXTRA_TAGS}" | tr "," " "); do
-        docker tag ${CI_REGISTRY_IMAGE}:${NODE}-slim quay.io/jitesoft/node:${tag}
-        docker push quay.io/jitesoft/node:${tag}
+      for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
+        docker tag ${CI_REGISTRY_IMAGE}:${NODE} quay.io/jitesoft/node-base:${tag}
+        docker push quay.io/jitesoft/node-base:${tag}
       done
   only:
     refs:
@@ -167,7 +167,7 @@ download:tars:
   script:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node,jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/full,jitesoft/node" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --progress plain --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
     - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
@@ -230,7 +230,7 @@ build:slim:stable:
     - download:versions
   variables:
     BUILD_TYPE: "stable"
-    EXTRA_TAGS: ",lts-slim,erbium-slim"
+    EXTRA_TAGS: ",lts,erbium"
     NODE_VERSION: "12"
   <<: *slim_build
 
