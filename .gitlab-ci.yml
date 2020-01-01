@@ -144,7 +144,7 @@ download:tars:
     - NODE=$(cat versions/${NODE_VERSION}.txt)
     - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
     - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}{EXTRA_TAGS}")
+    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
     - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
