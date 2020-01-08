@@ -93,14 +93,14 @@ download:tars:
 
 .build:binary:
   stage: build
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc/buildbase:latest
   dependencies:
     - download:tars
   before_script:
     - BUILD_ARCH=x86_64
     - DOCKER_ARCH=amd64
     - if [ "$(cat /etc/apk/arch)" == "aarch64" ]; then DOCKER_ARCH=arm64; BUILD_ARCH=arm64; fi
-    - apk add --no-cache build-base binutils-gold git python linux-headers ccache libstdc++ xz gnupg curl
+    - apk add --no-cache binutils-gold git python libstdc++
     - mkdir -p result/${DOCKER_ARCH} src
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
   script:
@@ -128,8 +128,6 @@ download:tars:
   extends: .build:binary
   tags:
     - jitesoft
-    - ">4x64"
-    - ">8gb"
     - "native-amd64"
 
 .build:binary:aarch64: &node_binary-aarch64
@@ -170,7 +168,7 @@ download:tars:
     - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/full,jitesoft/node" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --progress plain --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
+    - docker pull ${CI_REGISTRY_IMAGE}/full:${NODE}
     - |
       for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
         docker tag ${CI_REGISTRY_IMAGE}:${NODE} quay.io/jitesoft/node:${tag}
