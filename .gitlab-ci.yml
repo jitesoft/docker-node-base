@@ -62,7 +62,7 @@ download:versions:
 
 download:tars:
   stage: download
-  dependencies:
+  needs:
     - download:versions
     - download:pgp
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
@@ -94,7 +94,7 @@ download:tars:
 .build:binary:
   stage: build
   image: registry.gitlab.com/jitesoft/dockerfiles/misc/buildbase:latest
-  dependencies:
+  needs:
     - download:tars
   before_script:
     - BUILD_ARCH=x86_64
@@ -259,9 +259,6 @@ scan:stable:
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
     GIT_STRATEGY: none
-  only:
-    refs:
-      - master
 
 scan:latest:
   needs:
@@ -270,9 +267,6 @@ scan:latest:
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:13
     GIT_STRATEGY: none
-  only:
-    refs:
-      - master
 
 trigger_build:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
