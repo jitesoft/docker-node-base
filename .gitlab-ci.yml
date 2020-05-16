@@ -1,5 +1,5 @@
 include:
-  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/container_scan-v2.yml
+  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/Scan/trivy.yml
 
 stages:
   - pre
@@ -270,17 +270,6 @@ scan:latest:
   variables:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:13
     GIT_STRATEGY: none
-  only:
-    refs:
-      - master
-
-trigger_build:
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  stage: notify
-  before_script:
-    - apk add --no-cache curl
-  script:
-    - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
   only:
     refs:
       - master
