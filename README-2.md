@@ -14,19 +14,19 @@ The following tags are updated on a weekly schedule and built for amd64 and arm6
 
 ### Docker Hub
 
-* `13`, `latest`
+* `14`, `latest`
 * `12`, `stable`, `erbium`
 
 ### GitLab
 
 * `registry.gitlab.com/jitesoft/dockerfiles/node-base/full`
-    * `13`, `latest`
+    * `14`, `latest`
     * `12`, `stable`, `erbium`
 
 ### Quay.io
 
 * `quay.io/jitesoft/node`
-    * `13`, `latest`
+    * `14`, `latest`
     * `12`, `stable`, `erbium`
 
 ## Docker files

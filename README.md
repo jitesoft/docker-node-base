@@ -16,19 +16,19 @@ All images after v12 is built for amd64 and arm64.
 ### Docker Hub
 
 * `jitesoft/node-base`
-    * `13`, `latest`
+    * `14`, `latest`
     * `12`, `stable`, `lts`, `erbium`
 
 ### Quay.io
 
 * `quay.io/jitesoft/node-base`
-    * `13`, `latest`
+    * `14`, `latest`
     * `12`, `erbium`, `stable`
 
 ### GitLab
 
 * `registry.gitlab.com/jitesoft/dockerfiles/node-base`
-    * `13`, `latest`
+    * `14`, `latest`
     * `12`, `stable`, `erbium`
 
 ### Dockerfile

@@ -41,7 +41,7 @@ download:versions:
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   variables:
     GIT_STRATEGY: none
-    NODE_VERSIONS: "12 13"
+    NODE_VERSIONS: "12 14"
   before_script:
     - apk add --no-cache grep
   script:
@@ -185,7 +185,7 @@ download:tars:
 build:src:latest:
   variables:
     BUILD_TYPE: "latest"
-    NODE_VERSION: "13"
+    NODE_VERSION: "14"
     CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-amd64
 
@@ -199,7 +199,7 @@ build:src:stable:
 build:src:latest:arm64:
   variables:
     BUILD_TYPE: "latest-arm64"
-    NODE_VERSION: "13"
+    NODE_VERSION: "14"
     CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   <<: *node_binary-aarch64
 
@@ -217,7 +217,7 @@ build:slim:latest:
     - download:versions
   variables:
     BUILD_TYPE: "latest"
-    NODE_VERSION: "13"
+    NODE_VERSION: "14"
     EXTRA_TAGS: ""
   <<: *slim_build
 
@@ -239,7 +239,7 @@ build:latest:
   variables:
     EXTRA_TAGS: ""
     BUILD_TYPE: "latest"
-    NODE_VERSION: "13"
+    NODE_VERSION: "14"
   <<: *full_build
 
 build:stable:
@@ -265,7 +265,7 @@ scan:latest:
     - build:latest
   extends: .container_scanning
   variables:
-    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:13
+    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:14
     GIT_STRATEGY: none
 
 trigger_build:
