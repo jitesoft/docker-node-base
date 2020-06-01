@@ -104,6 +104,7 @@ download:tars:
     - DOCKER_ARCH=amd64
     - if [ "$(cat /etc/apk/arch)" == "aarch64" ]; then DOCKER_ARCH=arm64; BUILD_ARCH=arm64; fi
     - apk add --no-cache binutils-gold git python3 libstdc++ zlib-dev openssl-dev
+    - ln -s /usr/bin/python3 /usr/bin/python
     - mkdir -p result/${DOCKER_ARCH} src
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
   script:
