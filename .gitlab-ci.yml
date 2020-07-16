@@ -163,6 +163,8 @@ download:tars:
   stage: quay
   allow_failure: true
   needs:
+    - build:stable
+    - build:latest
     - download:versions
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   script:
@@ -177,6 +179,10 @@ download:tars:
   only:
     refs:
       - master
+  tags:
+    - jitesoft
+    - buildx
+    - protected
 
 .build:full: &full_build
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
