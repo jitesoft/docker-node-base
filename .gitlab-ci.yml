@@ -10,6 +10,7 @@ stages:
   - build
   - slim
   - full
+  - quay
   - scan
   - notify
 
@@ -150,12 +151,6 @@ download:tars:
     - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
-    - docker pull ${CI_REGISTRY_IMAGE}:${NODE}
-    - |
-      for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
-        docker tag ${CI_REGISTRY_IMAGE}:${NODE} quay.io/jitesoft/node-base:${tag}
-        docker push quay.io/jitesoft/node-base:${tag}
-      done
   only:
     refs:
       - master
@@ -163,6 +158,25 @@ download:tars:
     - jitesoft
     - buildx
     - protected
+
+.push:quay:
+  stage: quay
+  allow_failure: true
+  needs:
+    - download:versions
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  script:
+    - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
+    - docker pull ${CI_REGISTRY_IMAGE}${IMAGE_SUFFIX}:latest
+    - |
+      for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
+        docker tag ${CI_REGISTRY_IMAGE}${IMAGE_SUFFIX}:latest quay.io/jitesoft/${IMAGE}:${tag}
+        docker push quay.io/jitesoft/${IMAGE}:${tag}
+      done
+  only:
+    refs:
+      - master
 
 .build:full: &full_build
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
@@ -173,12 +187,6 @@ download:tars:
     - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/full,jitesoft/node" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
     - echo "Tags - ${TAGS}"
     - docker buildx build --platform "linux/amd64,linux/arm64" --progress plain --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-    - docker pull ${CI_REGISTRY_IMAGE}/full:${NODE}
-    - |
-      for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
-        docker tag ${CI_REGISTRY_IMAGE}:${NODE} quay.io/jitesoft/node:${tag}
-        docker push quay.io/jitesoft/node:${tag}
-      done
   only:
     refs:
       - master
@@ -256,6 +264,42 @@ build:stable:
     NODE_VERSION: "12"
     EXTRA_TAGS: ",lts,erbium"
   <<: *full_build
+
+push:slim:latest:quay:
+  extends: .push:quay
+  variables:
+    IMAGE_SUFFIX: ""
+    BUILD_TYPE: "latest"
+    NODE_VERSION: "14"
+    EXTRA_TAGS: ""
+    IMAGE: "node-base"
+
+push:full:latest:quay:
+  extends: .push:quay
+  variables:
+    IMAGE_SUFFIX: "/full"
+    BUILD_TYPE: "latest"
+    NODE_VERSION: "14"
+    EXTRA_TAGS: ""
+    IMAGE: "node"
+
+push:slim:stable:quay:
+  extends: .push:quay
+  variables:
+    IMAGE_SUFFIX: ""
+    BUILD_TYPE: "stable"
+    NODE_VERSION: "12"
+    EXTRA_TAGS: ",lts,erbium"
+    IMAGE: "node-base"
+
+push:full:stable:quay:
+  extends: .push:quay
+  variables:
+    IMAGE_SUFFIX: "/full"
+    BUILD_TYPE: "stable"
+    NODE_VERSION: "12"
+    EXTRA_TAGS: ",lts,erbium"
+    IMAGE: "node"
 
 scan:stable:
   needs:

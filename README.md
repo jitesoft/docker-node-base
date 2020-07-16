@@ -1,6 +1,6 @@
 # Node
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/jitesoft/node-base.svg)](https://cloud.docker.com/u/jitesoft/repository/docker/jitesoft/node-base)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jitesoft/node-base.svg)](https://hub.docker.com/r/jitesoft/node-base)
 [![Back project](https://img.shields.io/badge/Open%20Collective-Tip%20the%20devs!-blue.svg)](https://opencollective.com/jitesoft-open-source)
 
 Docker image containing Node.js using Alpine Linux as base.  
