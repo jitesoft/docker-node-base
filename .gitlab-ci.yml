@@ -200,6 +200,7 @@ scan:
 
 post:
   stage: .post
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   rules:
     - if: "$BUILD"
       when: on_success
