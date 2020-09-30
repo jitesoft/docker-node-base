@@ -202,29 +202,13 @@ post:
   stage: .post
   rules:
     - if: "$BUILD"
-      when: always
+      when: on_success
   script:
     - echo "${FULL_VERSION}" > ${VERSION}.txt
+    - echo "Notifying next job."
+    - curl -F token=${NOTIFY_TOKEN} -F ref=master  -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}"  https://gitlab.com/api/v4/projects/4048627/trigger/pipeline
   cache:
-    policy: pull
+    policy: push
     key: nodejs-major-${VERSION}
     paths:
       - ${VERSION}.txt
-
-
-.trigger_build:
-  rules:
-    - if: "$BUILD"
-      when: always
-    - when: never
-  needs:
-    - job: containerize:full
-      artifacts: false
-    - job: containerize:slim
-      artifacts: false
-  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
-  stage: notify
-  script:
-    - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
-
-
