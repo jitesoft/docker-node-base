@@ -40,7 +40,7 @@ check:
       fi
   cache:
     policy: pull
-    key: nodejs-major-${VERSION}.txt
+    key: nodejs-major-${VERSION}
     paths:
       - ${VERSION}.txt
 
@@ -123,7 +123,7 @@ download:tars:
     - ccache -s
     - ccache -s > result/ccache.log
     - mkdir binaries
-    - mv src/node-v${FULL_VERSION}-linux-${ARCH}-musl.tar.xz binaries/node-${ARCH}.tar.xz
+    - mv src/node-v${FULL_VERSION}-linux-${BUILD_ARCH}-musl.tar.xz binaries/node-${ARCH}.tar.xz
   cache:
     paths:
       - ccache/
@@ -198,7 +198,21 @@ scan:
     SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:${FULL_VERSION}
     GIT_STRATEGY: none
 
-trigger_build:
+post:
+  stage: .post
+  rules:
+    - if: "$BUILD"
+      when: always
+  script:
+    - echo "${FULL_VERSION}" > ${VERSION}.txt
+  cache:
+    policy: pull
+    key: nodejs-major-${VERSION}
+    paths:
+      - ${VERSION}.txt
+
+
+.trigger_build:
   rules:
     - if: "$BUILD"
       when: always
@@ -212,4 +226,5 @@ trigger_build:
   stage: notify
   script:
     - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
+
 
