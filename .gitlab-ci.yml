@@ -1,11 +1,7 @@
 include:
   - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/Scan/trivy.yml
 
-variables:
-  NO_AUTO: "true"
-
 stages:
-  - init
   - download
   - build
   - containerize
@@ -17,7 +13,7 @@ check:
     matrix:
       - { VERSION: "12", TYPE: "lts" }
       - { VERSION: "14", TYPE: "latest" }
-  stage: init
+  stage: .pre
   variables:
     GIT_STRATEGY: none
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
@@ -49,7 +45,7 @@ download:pgp:
     - if: "$BUILD"
       when: always
     - when: never
-  stage: init
+  stage: .pre
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   script:
     - |
@@ -186,19 +182,7 @@ containerize:full:
     - protected
     - buildx
 
-scan:
-  rules:
-    - if: "$BUILD"
-      when: always
-    - if: "$SCAN"
-      when: always
-    - when: never
-  extends: .container_scanning
-  variables:
-    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:${FULL_VERSION}
-    GIT_STRATEGY: none
-
-post:
+notify:node-yarn:
   stage: .post
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   rules:
@@ -213,3 +197,27 @@ post:
     key: nodejs-major-${VERSION}
     paths:
       - ${VERSION}.txt
+
+notify:trivy:
+  stage: .post
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  rules:
+    - if: "$BUILD"
+      when: on_success
+  script:
+    - echo "Notifying scanner."
+    - curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[SCAN]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+
+scan:
+  parallel:
+    matrix:
+      - { TYPE: "slim", IMAGE: "${CI_REGISTRY_IMAGE}" }
+      - { TYPE: "full", IMAGE: "${CI_REGISTRY_IMAGE}/full" }
+  rules:
+    - if: "$SCAN"
+      when: always
+    - when: never
+  extends: .container_scanning
+  variables:
+    SCANNING_IMAGE_NAME: ${IMAGE}:${FULL_VERSION}
+    GIT_STRATEGY: none
