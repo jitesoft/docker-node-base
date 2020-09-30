@@ -189,9 +189,17 @@ notify:node-yarn:
     - if: "$BUILD"
       when: on_success
   script:
-    - echo "${FULL_VERSION}" > ${VERSION}.txt
     - echo "Notifying next job."
     - curl -F token=${NOTIFY_TOKEN} -F ref=master  -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}"  https://gitlab.com/api/v4/projects/4048627/trigger/pipeline
+
+create:cache:
+  stage: .post
+  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  rules:
+    - if: "$BUILD"
+      when: on_success
+  script:
+    - echo "${FULL_VERSION}" > ${VERSION}.txt
   cache:
     policy: push
     key: nodejs-major-${VERSION}
