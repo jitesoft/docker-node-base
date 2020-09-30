@@ -1,4 +1,4 @@
-# Node
+# Node-Base
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/jitesoft/node-base.svg)](https://hub.docker.com/r/jitesoft/node-base)
 [![Back project](https://img.shields.io/badge/Open%20Collective-Tip%20the%20devs!-blue.svg)](https://opencollective.com/jitesoft-open-source)
@@ -15,21 +15,30 @@ All images after v12 is built for amd64 and arm64.
 
 ### Docker Hub
 
-* `jitesoft/node-base`
+* `docker.io/jitesoft/node-base`
     * `14`, `latest`
-    * `12`, `stable`, `lts`, `erbium`
-
-### Quay.io
-
-* `quay.io/jitesoft/node-base`
-    * `14`, `latest`
-    * `12`, `erbium`, `stable`
+    * `12`, `lts`
 
 ### GitLab
 
 * `registry.gitlab.com/jitesoft/dockerfiles/node-base`
     * `14`, `latest`
-    * `12`, `stable`, `erbium`
+    * `12`, `lts`
+
+### GitHub
+
+* `ghcr.io/jitesoft/node-base`
+    * `14`, `latest`
+    * `12`, `lts`
+
+### Quay.io
+
+* `quay.io/jitesoft/node-base`
+    * `14`, `latest`
+    * `12`, `lts`
+
+_OBSERVE: Currently, all images on GitHub are private until their multi-arch support is working as intended._  
+_OBSERVE: Currently, all pushes to Quay are paused until their multi-arch support is working as intended._  
 
 ### Dockerfile
 
