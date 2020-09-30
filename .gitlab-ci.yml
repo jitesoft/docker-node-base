@@ -2,6 +2,7 @@ include:
   - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/Scan/trivy.yml
 
 stages:
+  - pre
   - download
   - build
   - containerize
@@ -13,7 +14,7 @@ check:
     matrix:
       - { VERSION: "12", TYPE: "lts" }
       - { VERSION: "14", TYPE: "latest" }
-  stage: .pre
+  stage: pre
   variables:
     GIT_STRATEGY: none
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
@@ -45,7 +46,7 @@ download:pgp:
     - if: "$BUILD"
       when: always
     - when: never
-  stage: .pre
+  stage: pre
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   script:
     - |
