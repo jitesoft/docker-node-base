@@ -11,18 +11,18 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
       com.jitesoft.app.nodejs.version="${NODE_VERSION}"
 
 ARG TARGETARCH
-ARG NODE_VERSION
 
-RUN --mount=type=bind,source=./result,target=/tmp \
+RUN --mount=type=bind,source=./binaries,target=/tmp \
  addgroup -g 1000 node \
  && adduser -u 1000 -G node -s /bin/sh -D node \
  && apk add --no-cache --virtual .node-deps libstdc++ \
  && apk add --no-cache --virtual .install-deps tar xz \
- && tar -Jxf /tmp/node-v${NODE_VERSION}-linux-${TARGETARCH}-musl.tar.xz -C /usr/local/ --strip-components=1 \
- && apk del .install-deps \
+ && tar -Jxf /tmp/node-${TARGETARCH}.tar.xz -C /usr/local/ --strip-components=1 \
  && rm -rf /node.tar.xz \
+ && apk del .install-deps \
  && chmod +x /usr/local/bin/* \
  && node --version \
  && npm version
 
 CMD [ "node" ]
+
