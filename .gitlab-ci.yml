@@ -5,17 +5,55 @@ variables:
   NO_AUTO: "true"
 
 stages:
-  - pre
+  - init
   - download
   - build
-  - slim
-  - full
+  - containerize
   - quay
   - scan
   - notify
 
+check:
+  parallel:
+    matrix:
+      - { VERSION: "12", TYPE: "lts" }
+      - { VERSION: "14", TYPE: "latest" }
+  stage: init
+  variables:
+    GIT_STRATEGY: none
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - when: never
+  script:
+    - FULL_VERSION=$(wget -qO- https://nodejs.org/dist/latest-v${VERSION}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}')
+    - touch ${VERSION}.txt
+    - |
+      if [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ]; then
+        echo "Full version ${FULL_VERSION} is not same as current. Will build."
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+      else
+        echo "Only scan ${FULL_VERSION}."
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[SCAN]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+      fi
+  cache:
+    policy: pull
+    key: nodejs-major-${VERSION}.txt
+    paths:
+      - ${VERSION}.txt
+
 download:pgp:
-  stage: pre
+  rules:
+    - if: "$BUILD"
+      when: always
+    - changes:
+        - gpgkeys.txt
+      when: always
+    - when: never
+  stage: init
   image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
   before_script:
     - apk add --no-cache gnupg linux-headers
@@ -29,8 +67,6 @@ download:pgp:
         gpg --list-keys ${key} || (gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
       done
     - gpg --export > keys.out
-  tags:
-    - jitesoft
   cache:
     key: nodejs.gpg.keyring
     paths:
@@ -40,296 +76,146 @@ download:pgp:
       - keys.out
     expire_in: 1 day
 
-download:versions:
-  stage: pre
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  variables:
-    GIT_STRATEGY: none
-    NODE_VERSIONS: "12 14"
-  before_script:
-    - apk add --no-cache grep
-  script:
-    - mkdir versions
-    - |
-      for version in $NODE_VERSIONS; do
-        wget -qO- https://nodejs.org/dist/latest-v${version}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}' > versions/${version}.txt
-      done;
-  only:
-    refs:
-      - master
-  tags:
-    - jitesoft
-  artifacts:
-    paths:
-      - versions/*.txt
-    expire_in: 1 day
-
 download:tars:
   stage: download
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
   needs:
-    - download:versions
-    - download:pgp
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  before_script:
-    - apk add --no-cache curl grep gnupg
-    - gpg --import keys.out
+    - job: download:pgp
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   script:
-    - |
-      for VERSION_FILE in versions/*.txt; do
-        VERSION=$(cat ${VERSION_FILE})
-        curl -OsS https://nodejs.org/dist/v${VERSION}/node-v${VERSION}.tar.xz
-        curl -OsS https://nodejs.org/dist/v${VERSION}/SHASUMS256.txt
-        curl -OsS https://nodejs.org/dist/v${VERSION}/SHASUMS256.txt.sig
-        gpg --verify SHASUMS256.txt.sig SHASUMS256.txt
-        grep " node-v${VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
-        mv node-v${VERSION}.tar.xz versions/node-v${VERSION}.tar.xz
-      done;
-  tags:
-    - jitesoft
-  only:
-    refs:
-      - master
+    - gpg --import keys.out
+    - curl -OsS https://nodejs.org/dist/v${FULL_VERSION}/node-v${FULL_VERSION}.tar.xz
+    - curl -OsS https://nodejs.org/dist/v${FULL_VERSION}/SHASUMS256.txt
+    - curl -OsS https://nodejs.org/dist/v${FULL_VERSION}/SHASUMS256.txt.sig
+    - gpg --verify SHASUMS256.txt.sig SHASUMS256.txt
+    - grep " node-v${FULL_VERSION}.tar.xz\$" SHASUMS256.txt | sha256sum -c -
+    - mv node-v${FULL_VERSION}.tar.xz node-v${VERSION}.tar.xz
   artifacts:
     paths:
-      - versions/*.tar.xz
-      - versions/*.txt
+      - node-v${VERSION}.tar.xz
     expire_in: 1 day
 
 .build:binary:
   stage: build
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
   image: registry.gitlab.com/jitesoft/dockerfiles/misc/buildbase:latest
   needs:
-    - download:tars
+    - job: download:tars
+      artifacts: true
   before_script:
-    - BUILD_ARCH=x86_64
-    - DOCKER_ARCH=amd64
-    - if [ "$(cat /etc/apk/arch)" == "aarch64" ]; then DOCKER_ARCH=arm64; BUILD_ARCH=arm64; fi
     - apk add --no-cache binutils-gold git python3 libstdc++ zlib-dev openssl-dev
-    - if [ $NODE_VERSION == "12" ]; then apk add --no-cache python2; fi
-    - if [ $NODE_VERSION == "14" ]; then ln -s /usr/bin/python3 /usr/bin/python; fi
-    - mkdir -p result/${DOCKER_ARCH} src
+    - if [ "$VERSION" == "12" ]; then apk add --no-cache python2; fi
+    - if [ "$VERSION" == "14" ]; then ln -s /usr/bin/python3 /usr/bin/python; fi
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
-  script:
     - export PATH="/usr/lib/ccache/bin:$PATH"
-    - NODE=$(cat versions/${NODE_VERSION}.txt)
+    - export CCACHE_DIR="${CI_PROJECT_DIR}/ccache"
     - ccache -s
-    - tar -Jxf versions/node-v${NODE}.tar.xz -C src --strip-components=1
+  script:
+    - mkdir result src
+    - tar -Jxf node-v${VERSION}.tar.xz -C src --strip-components=1
     - cd src
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
     - make -j4 binary V= DESTCPU="${BUILD_ARCH}" ARCH="${BUILD_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - ccache -s > result/ccache.log
-    - mv src/node-v${NODE}-linux-${BUILD_ARCH}-musl.tar.xz result/node-v${NODE}-linux-${DOCKER_ARCH}-musl.tar.xz
+    - mkdir binaries
+    - mv src/node-v${FULL_VERSION}-linux-${ARCH}-musl.tar.xz binaries/node-${ARCH}.tar.xz
   cache:
     paths:
       - ccache/
-    key: node.build.ccache-${BUILD_TYPE}
+    key: ccache-${VERSION}-${ARCH}
   artifacts:
+    when: on_success
     paths:
-      - result/
-    expire_in: 3 days
+      - binaries/
+    expire_in: 1 day
 
-.build:binary:amd64: &node_binary-amd64
+build:arm:
   extends: .build:binary
-  tags:
-    - jitesoft
-    - "native-amd64"
-
-.build:binary:aarch64: &node_binary-aarch64
-  extends: .build:binary
+  variables:
+    ARCH: arm64
+    BUILD_ARCH: arm64
   tags:
     - "native-aarch64"
 
-.build:slim: &slim_build
-  stage: slim
-  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
-  script:
-    - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - echo "Building slim image for node v ${NODE} - short name ${NODE_SHORT}"
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE},jitesoft/node-base" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
-    - echo "Tags - ${TAGS}"
-    - docker buildx build --platform "linux/amd64,linux/arm64" --push ${TAGS} --build-arg NODE_VERSION=${NODE} --progress plain -f slim/Dockerfile .
-  only:
-    refs:
-      - master
+build:amd:
+  extends: .build:binary
+  variables:
+    ARCH: amd64
+    BUILD_ARCH: x86_64
   tags:
-    - jitesoft
-    - buildx
-    - protected
+    - "native-amd64"
 
-.push:quay:
-  stage: quay
-  allow_failure: true
+containerize:slim:
+  stage: containerize
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
   needs:
-    - build:stable
-    - build:latest
-    - download:versions
-  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+    - job: build:amd
+      artifacts: true
+    - job: build:arm
+      artifacts: true
   script:
-    - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - docker pull ${CI_REGISTRY_IMAGE}${IMAGE_SUFFIX}:latest
-    - |
-      for tag in $(echo "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}" | tr "," " "); do
-        docker tag ${CI_REGISTRY_IMAGE}${IMAGE_SUFFIX}:latest quay.io/jitesoft/${IMAGE}:${tag}
-        docker push quay.io/jitesoft/${IMAGE}:${tag}
-      done
-  only:
-    refs:
-      - master
+    - TAGS=$(helper "${CI_REGISTRY_IMAGE},jitesoft/node-base,ghcr.io/jitesoft/node-base" "${VERSION},${FULL_VERSION},${TYPE}")
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f slim/Dockerfile .
   tags:
-    - jitesoft
-    - buildx
     - protected
+    - buildx
 
-.build:full: &full_build
-  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
-  stage: full
+containerize:full:
+  stage: containerize
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
+  needs:
+    - job: build:amd
+      artifacts: true
+    - job: build:arm
+      artifacts: true
   script:
-    - NODE=$(cat versions/${NODE_VERSION}.txt)
-    - NODE_SHORT=$(echo ${NODE} | cut -d'.' -f1)
-    - TAGS=$(helper taglist "${CI_REGISTRY_IMAGE}/full,jitesoft/node" "${NODE},${NODE_SHORT},${BUILD_TYPE}${EXTRA_TAGS}")
-    - echo "Tags - ${TAGS}"
-    - docker buildx build --platform "linux/amd64,linux/arm64" --progress plain --push ${TAGS} --build-arg NODE_VERSION=${NODE} -f full/Dockerfile .
-  only:
-    refs:
-      - master
+    - TAGS=$(helper "${CI_REGISTRY_IMAGE}/full,jitesoft/node,ghcr.io/jitesoft/node" "${VERSION},${FULL_VERSION},${TYPE}")
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
   tags:
-    - jitesoft
-    - buildx
     - protected
+    - buildx
 
-build:src:latest:
-  variables:
-    BUILD_TYPE: "latest"
-    NODE_VERSION: "14"
-    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
-  <<: *node_binary-amd64
-
-build:src:stable:
-  variables:
-    BUILD_TYPE: "stable"
-    NODE_VERSION: "12"
-    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
-  <<: *node_binary-amd64
-
-build:src:latest:arm64:
-  variables:
-    BUILD_TYPE: "latest-arm64"
-    NODE_VERSION: "14"
-    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
-  <<: *node_binary-aarch64
-
-build:src:stable:arm64:
-  variables:
-    BUILD_TYPE: "stable-arm64"
-    NODE_VERSION: "12"
-    CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
-  <<: *node_binary-aarch64
-
-build:slim:latest:
-  needs:
-    - build:src:latest
-    - build:src:latest:arm64
-    - download:versions
-  variables:
-    BUILD_TYPE: "latest"
-    NODE_VERSION: "14"
-    EXTRA_TAGS: ""
-  <<: *slim_build
-
-build:slim:stable:
-  needs:
-    - build:src:stable
-    - build:src:stable:arm64
-    - download:versions
-  variables:
-    BUILD_TYPE: "stable"
-    EXTRA_TAGS: ",lts,erbium"
-    NODE_VERSION: "12"
-  <<: *slim_build
-
-build:latest:
-  needs:
-    - download:versions
-    - build:slim:latest
-  variables:
-    EXTRA_TAGS: ""
-    BUILD_TYPE: "latest"
-    NODE_VERSION: "14"
-  <<: *full_build
-
-build:stable:
-  needs:
-    - build:slim:stable
-    - download:versions
-  variables:
-    BUILD_TYPE: "stable"
-    NODE_VERSION: "12"
-    EXTRA_TAGS: ",lts,erbium"
-  <<: *full_build
-
-push:slim:latest:quay:
-  extends: .push:quay
-  variables:
-    IMAGE_SUFFIX: ""
-    BUILD_TYPE: "latest"
-    NODE_VERSION: "14"
-    EXTRA_TAGS: ""
-    IMAGE: "node-base"
-
-push:full:latest:quay:
-  extends: .push:quay
-  variables:
-    IMAGE_SUFFIX: "/full"
-    BUILD_TYPE: "latest"
-    NODE_VERSION: "14"
-    EXTRA_TAGS: ""
-    IMAGE: "node"
-
-push:slim:stable:quay:
-  extends: .push:quay
-  variables:
-    IMAGE_SUFFIX: ""
-    BUILD_TYPE: "stable"
-    NODE_VERSION: "12"
-    EXTRA_TAGS: ",lts,erbium"
-    IMAGE: "node-base"
-
-push:full:stable:quay:
-  extends: .push:quay
-  variables:
-    IMAGE_SUFFIX: "/full"
-    BUILD_TYPE: "stable"
-    NODE_VERSION: "12"
-    EXTRA_TAGS: ",lts,erbium"
-    IMAGE: "node"
-
-scan:stable:
-  needs:
-    - build:stable
+scan:
+  rules:
+    - if: "$BUILD"
+      when: always
+    - if: "$SCAN"
+      when: always
+    - when: never
   extends: .container_scanning
   variables:
-    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:12
-    GIT_STRATEGY: none
-
-scan:latest:
-  needs:
-    - build:latest
-  extends: .container_scanning
-  variables:
-    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:14
+    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}:${FULL_VERSION}
     GIT_STRATEGY: none
 
 trigger_build:
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
+  rules:
+    - if: "$BUILD"
+      when: always
+    - when: never
+  needs:
+    - job: containerize:full
+      artifacts: false
+    - job: containerize:slim
+      artifacts: false
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   stage: notify
-  before_script:
-    - apk add --no-cache curl
   script:
     - "curl -X POST -F token=${NOTIFY_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/4048627/trigger/pipeline"
-  only:
-    refs:
-      - master
+
