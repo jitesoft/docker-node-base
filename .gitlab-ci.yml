@@ -9,7 +9,6 @@ stages:
   - download
   - build
   - containerize
-  - quay
   - scan
   - notify
 
@@ -51,9 +50,7 @@ download:pgp:
       when: always
     - when: never
   stage: init
-  image: registry.gitlab.com/jitesoft/dockerfiles/alpine:latest
-  before_script:
-    - apk add --no-cache gnupg linux-headers
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   script:
     - |
       if [ -f keys.out ]; then
