@@ -148,6 +148,7 @@ build:amd:
     - "native-amd64"
 
 containerize:slim:
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   stage: containerize
   rules:
     - if: "$BUILD"
@@ -166,6 +167,7 @@ containerize:slim:
     - buildx
 
 containerize:full:
+  image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   stage: containerize
   rules:
     - if: "$BUILD"
@@ -220,13 +222,13 @@ notify:trivy:
 scan:
   parallel:
     matrix:
-      - { TYPE: "slim", IMAGE: "${CI_REGISTRY_IMAGE}" }
-      - { TYPE: "full", IMAGE: "${CI_REGISTRY_IMAGE}/full" }
+      - { TYPE: "slim", SCAN_SUFFIX: "" }
+      - { TYPE: "full", SCAN_SUFFIX: "/full" }
   rules:
     - if: "$SCAN"
       when: always
     - when: never
   extends: .container_scanning
   variables:
-    SCANNING_IMAGE_NAME: ${IMAGE}:${FULL_VERSION}
+    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}${SCAN_SUFFIX}:${FULL_VERSION}
     GIT_STRATEGY: none

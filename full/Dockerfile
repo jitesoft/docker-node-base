@@ -19,7 +19,6 @@ RUN --mount=type=bind,source=./binaries,target=/tmp \
  && apk add --no-cache --virtual .node-deps-full git g++ gcc curl wget make python3 openssl \
  && apk add --no-cache --virtual .install-deps tar xz \
  && tar -Jxf /tmp/node-${TARGETARCH}.tar.xz -C /usr/local/ --strip-components=1 \
- && rm -rf /node.tar.xz \
  && apk del .install-deps \
  && chmod +x /usr/local/bin/* \
  && node --version \
