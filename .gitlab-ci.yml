@@ -222,13 +222,13 @@ notify:trivy:
 scan:
   parallel:
     matrix:
-      - { TYPE: "slim", SCAN_SUFFIX: "" }
-      - { TYPE: "full", SCAN_SUFFIX: "/full" }
+      - { TYPE: "slim", SCAN_SUFFIX: "node-base" }
+      - { TYPE: "full", SCAN_SUFFIX: "node-base/full" }
   rules:
     - if: "$SCAN"
       when: always
     - when: never
   extends: .container_scanning
   variables:
-    SCANNING_IMAGE_NAME: ${CI_REGISTRY_IMAGE}${SCAN_SUFFIX}:${FULL_VERSION}
+    SCANNING_IMAGE_NAME: registry.gitlab.com/jitesoft/dockerfiles/${SCAN_SUFFIX}:${FULL_VERSION}
     GIT_STRATEGY: none
