@@ -1,6 +1,12 @@
 include:
   - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/Scan/trivy.yml
 
+workflow:
+  rules:
+    - if: "$CI_COMMIT_BRANCH == 'master'"
+      when: always
+    - when: never
+
 stages:
   - pre
   - download
@@ -189,6 +195,8 @@ notify:node-yarn:
   stage: .post
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
   rules:
+    - if: "$SCAN"
+      when: always
     - if: "$BUILD"
       when: on_success
   script:
