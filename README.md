@@ -37,7 +37,6 @@ All images after v12 is built for amd64 and arm64.
     * `14`, `latest`
     * `12`, `lts`
 
-_OBSERVE: Currently, all images on GitHub are private until their multi-arch support is working as intended._  
 _OBSERVE: Currently, all pushes to Quay are paused until their multi-arch support is working as intended._  
 
 ### Dockerfile
