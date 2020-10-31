@@ -33,9 +33,11 @@ check:
     - when: never
   script:
     - FULL_VERSION=$(wget -qO- https://nodejs.org/dist/latest-v${VERSION}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}')
+    - NPM_VERSION=$(wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name")" | awk 'NR==1{print $1}')
+    - touch npm-version.txt
     - touch ${VERSION}.txt
     - |
-      if [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ]; then
+      if [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ] || [ "${NPM_VERSION}" != "$(cat npm-version.txt)" ]; then
         echo "Full version ${FULL_VERSION} is not same as current. Will build."
         curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
       else
@@ -47,6 +49,7 @@ check:
     key: nodejs-major-${VERSION}
     paths:
       - ${VERSION}.txt
+      - npm-version.txt
 
 download:pgp:
   rules:
@@ -210,11 +213,13 @@ create:cache:
       when: on_success
   script:
     - echo "${FULL_VERSION}" > ${VERSION}.txt
+    - wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name")" | awk 'NR==1{print $1}' > npm-version.txt
   cache:
     policy: push
     key: nodejs-major-${VERSION}
     paths:
       - ${VERSION}.txt
+      - npm-version.txt
 
 notify:trivy:
   stage: .post
