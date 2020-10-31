@@ -33,7 +33,7 @@ check:
     - when: never
   script:
     - FULL_VERSION=$(wget -qO- https://nodejs.org/dist/latest-v${VERSION}.x/ | grep -oP "(?<=>node-v)(([0-9]{0,3}(\.?)){3})" | awk 'NR==1{print $1}')
-    - NPM_VERSION=$(wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name")" | awk 'NR==1{print $1}')
+    - NPM_VERSION=$(wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name" | awk 'NR==1{print $1}')
     - touch npm-version.txt
     - touch ${VERSION}.txt
     - |
@@ -213,7 +213,7 @@ create:cache:
       when: on_success
   script:
     - echo "${FULL_VERSION}" > ${VERSION}.txt
-    - wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name")" | awk 'NR==1{print $1}' > npm-version.txt
+    - wget -qO- https://api.github.com/repos/npm/cli/releases | jq -r ".[0].tag_name" | awk 'NR==1{print $1}' > npm-version.txt
   cache:
     policy: push
     key: nodejs-major-${VERSION}
