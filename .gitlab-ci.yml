@@ -130,7 +130,6 @@ download:tars:
     - ccache -s
     - ccache -s > result/ccache.log
     - mkdir binaries
-    - npm install -g npm@7
     - mv src/node-v${FULL_VERSION}-linux-${BUILD_ARCH}-musl.tar.xz binaries/node-${ARCH}.tar.xz
   cache:
     paths:
