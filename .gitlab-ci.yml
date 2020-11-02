@@ -37,7 +37,7 @@ check:
     - touch npm-version.txt
     - touch ${VERSION}.txt
     - |
-      if [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ] || [ "${NPM_VERSION}" != "$(cat npm-version.txt)" ]; then
+      if [ ! -z "${FORCE_BUILD+x}" ] || [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ] || [ "${NPM_VERSION}" != "$(cat npm-version.txt)" ]; then
         echo "Full version ${FULL_VERSION} is not same as current. Will build."
         curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
       else
@@ -124,6 +124,7 @@ download:tars:
     - mkdir result src
     - tar -Jxf node-v${VERSION}.tar.xz -C src --strip-components=1
     - cd src
+    - ./configure
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
     - make -j4 binary V= DESTCPU="${BUILD_ARCH}" ARCH="${BUILD_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
