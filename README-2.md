@@ -6,35 +6,23 @@
 Docker image containing Node.js, using alpine linux as base.  
 This image includes packages which are used to build common node packages:  
 `gcc`, `g++`, `curl`, `wget`, `openssl`, `python` and `make`.  
-If you are looking for a version without the above packages, use the [`jitesoft/node-base`](https://hub.docker.com/repository/docker/jitesoft/node-base) image.
+If you are looking for a version without the above packages, use the [`jitesoft/node-base`](https://hub.docker.com/r/jitesoft/node-base) image.
 
-## Tags
+## Image/Tags
 
-The following tags are updated on a weekly schedule and built for amd64 and arm64.
+All images after v12 is built for amd64 and arm64.  
+Tags are based on the latest versions at build time, with `latest` tag refering to latest and `lts` to latest lts release.
 
-### Docker Hub
+Images can be found at:
 
-* `docker.io/jitesoft/node`
-    * `14`, `latest`
-    * `12`, `lts`
-
-### GitLab
-
-* `registry.gitlab.com/jitesoft/dockerfiles/node-base/full`
-    * `14`, `latest`
-    * `12`, `lts`
-
-### GitHub
-
-* `ghcr.io/jitesoft/node`
-    * `14`, `latest`
-    * `12`, `lts`
-    
-### Quay.io
-
-* `quay.io/jitesoft/node`
-    * `14`, `latest`
-    * `12`, `lts`
+* [DockerHub](https://hub.docker.com/r/jitesoft/node)
+    * `docker.io/jitesoft/node`
+* [GitLab](https://gitlab.com/jitesoft/dockerfiles/node-base)
+    * `registry.gitlab.com/jitesoft/dockerfiles/node-base/full`
+* [GitHub](https://github.com/orgs/jitesoft/packages/container/package/node)
+    * `ghcr.io/jitesoft/node`
+* [Quay](https://quay.io/jitesoft/node)
+    * `quay.io/jitesoft/node`
 
 _OBSERVE: Currently, all pushes to Quay are paused until their multi-arch support is working as intended._  
 
@@ -50,3 +38,24 @@ This image follows the [Jitesoft image label specification 1.0.0](https://gitlab
 
 Files in this repository are released under the MIT license.  
 Read the nodejs license [here](https://github.com/nodejs/node/blob/master/LICENSE).
+
+## Sponsors
+
+Sponsoring is vital for the further development and maintaining of open source projects.  
+Questions and sponsoring queries can be made via <a href="mailto:sponsor@jitesoft.com">email</a>.  
+If you wish to sponsor our projects, reach out to the email above or visit any of the following sites:
+
+[Open Collective](https://opencollective.com/jitesoft-open-source)  
+[GitHub Sponsors](https://github.com/sponsors/jitesoft)  
+[Patreon](https://www.patreon.com/jitesoft)
+
+Jitesoft images are built via GitLab CI on runners hosted by the following wonderful organisations:
+
+<a href="https://www.linaro.org/">
+  <img src="https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/linaro.png" width="256" alt="Linaro logo" />
+</a>
+<a href="https://fosshost.org/">
+  <img src="https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/fosshost.png" width="256" alt="Fosshost logo" />
+</a>
+
+_The companies above are not affiliated with Jitesoft or any Jitesoft Projects directly._
