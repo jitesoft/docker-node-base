@@ -20,7 +20,8 @@ check:
     matrix:
       - { VERSION: "12", TYPE: "erbium" }
       - { VERSION: "14", TYPE: "lts" }
-      - { VERSION: "15", TYPE: "latest" }
+      - { VERSION: "15", TYPE: "maintenance" }
+      - { VERSION: "16", TYPE: "latest" }
   stage: pre
   variables:
     GIT_STRATEGY: none
@@ -129,7 +130,6 @@ download:tars:
     - make -j4 binary V= DESTCPU="${BUILD_ARCH}" ARCH="${BUILD_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
-    - ccache -s > result/ccache.log
     - mkdir binaries
     - mv src/node-v${FULL_VERSION}-linux-${BUILD_ARCH}-musl.tar.xz binaries/node-${ARCH}.tar.xz
   cache:
