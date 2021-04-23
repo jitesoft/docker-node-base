@@ -127,7 +127,7 @@ download:tars:
     - cd src
     - ./configure
     # Only print every 100th line, build.log is added to out directory, err is piped to stdout.
-    - make -j binary V= DESTCPU="${BUILD_ARCH}" ARCH="${BUILD_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
+    - make -j4 binary V= DESTCPU="${BUILD_ARCH}" ARCH="${BUILD_ARCH}" VARIATION="musl" RELEASE_URLBASE="https://gitlab.com/jitesoft/dockerfiles/node-base" | tee ../result/build.log | awk 'NR%100==0 {print NR,$0}'
     - cd ..
     - ccache -s
     - mkdir binaries
