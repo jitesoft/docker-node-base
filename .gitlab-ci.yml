@@ -19,9 +19,9 @@ check:
   parallel:
     matrix:
       - { VERSION: "12", TYPE: "erbium" }
-      - { VERSION: "14", TYPE: "lts" }
+      - { VERSION: "14", TYPE: "fermium", EXTRA: "lts" }
       - { VERSION: "15", TYPE: "maintenance" }
-      - { VERSION: "16", TYPE: "latest" }
+      - { VERSION: "16", TYPE: "latest", EXTRA: "stable" }
   stage: pre
   variables:
     GIT_STRATEGY: none
@@ -40,7 +40,7 @@ check:
     - |
       if [ ! -z "${FORCE_BUILD+x}" ] || [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ] || [ "${NPM_VERSION}" != "$(cat npm-version.txt)" ]; then
         echo "Full version ${FULL_VERSION} is not same as current. Will build."
-        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[EXTRA_TAGS]=${EXTRA_TAGS}" -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
       else
         echo "Only scan ${FULL_VERSION}."
         curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[SCAN]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
@@ -143,6 +143,7 @@ download:tars:
     expire_in: 1 day
 
 build:arm:
+  timeout: 10 hours
   extends: .build:binary
   variables:
     ARCH: arm64
@@ -172,6 +173,11 @@ containerize:slim:
       artifacts: true
   script:
     - TAGS=$(helper "${CI_REGISTRY_IMAGE},jitesoft/node-base,ghcr.io/jitesoft/node-base" "${VERSION},${FULL_VERSION},${TYPE}")
+    - |
+      if [ -z "${EXTRA_TAGS}" ]; then
+        MORE_TAGS=$(helper "CI_REGISTRY_IMAGE/full,jitesoft/node,ghcr.io/jitesoft/node" "${EXTRA_TAGS}")
+        TAGS="${TAGS} ${MORE_TAGS}"
+      fi
     - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f slim/Dockerfile .
   tags:
     - protected
@@ -191,6 +197,11 @@ containerize:full:
       artifacts: true
   script:
     - TAGS=$(helper "${CI_REGISTRY_IMAGE}/full,jitesoft/node,ghcr.io/jitesoft/node" "${VERSION},${FULL_VERSION},${TYPE}")
+    - |
+      if [ -z "${EXTRA_TAGS}" ]; then
+        MORE_TAGS=$(helper "CI_REGISTRY_IMAGE/full,jitesoft/node,ghcr.io/jitesoft/node" "${EXTRA_TAGS}")
+        TAGS="${TAGS} ${MORE_TAGS}"
+      fi
     - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
   tags:
     - protected
