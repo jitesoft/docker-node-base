@@ -20,8 +20,8 @@ check:
     matrix:
       - { VERSION: "12", TYPE: "erbium" }
       - { VERSION: "14", TYPE: "fermium", EXTRA: "lts" }
-      - { VERSION: "15", TYPE: "maintenance" }
-      - { VERSION: "16", TYPE: "latest", EXTRA: "stable" }
+      - { VERSION: "16", TYPE: "maintenance" }
+      - { VERSION: "17", TYPE: "latest", EXTRA: "stable" }
   stage: pre
   variables:
     GIT_STRATEGY: none
