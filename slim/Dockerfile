@@ -10,7 +10,7 @@ LABEL maintainer="Johannes Tegnér <johannes@jitesoft.com>" \
       com.jitesoft.project.repo.uri="https://gitlab.com/jitesoft/dockerfiles/node-base" \
       com.jitesoft.project.repo.issues="https://gitlab.com/jitesoft/dockerfiles/node-base/issues" \
       com.jitesoft.project.registry.uri="registry.gitlab.com/jitesoft/dockerfiles/node-base" \
-      com.jitesoft.app.nodejs.version="${NODE_VERSION}"
+      com.jitesoft.app.nodejs.version="${NODE_VERSION}" \
       # Open container labels
       org.opencontainers.image.version="${NODE_VERSION}" \
       org.opencontainers.image.created="${BUILD_TIME}" \
