@@ -178,7 +178,7 @@ containerize:slim:
         MORE_TAGS=$(helper "CI_REGISTRY_IMAGE/full,jitesoft/node,ghcr.io/jitesoft/node" "${EXTRA_TAGS}")
         TAGS="${TAGS} ${MORE_TAGS}"
       fi
-    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f slim/Dockerfile .
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg BUILD_TIME="$(date -Iseconds)" --build-arg NODE_VERSION=${VERSION} --progress plain -f slim/Dockerfile .
   tags:
     - protected
     - buildx
@@ -202,7 +202,7 @@ containerize:full:
         MORE_TAGS=$(helper "CI_REGISTRY_IMAGE/full,jitesoft/node,ghcr.io/jitesoft/node" "${EXTRA_TAGS}")
         TAGS="${TAGS} ${MORE_TAGS}"
       fi
-    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
+    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg BUILD_TIME="$(date -Iseconds)" --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
   tags:
     - protected
     - buildx
