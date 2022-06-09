@@ -61,21 +61,26 @@ download:pgp:
     - when: never
   stage: pre
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
+  before_script:
+    - "[ -f checksum.txt ] || touch checksum.txt"
   script:
+    - SHA=$(sha256sum checksum.txt)
     - |
-      if [ -f keys.out ]; then
-        gpg --import keys.out
-      fi
-    - |
-      for key in `cat gpgkeys.txt`; do
-        gpg --list-keys ${key} || (gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
-      done
+      if [ "$(cat checksum.txt)" != "${SHA}" ]; then
+        for key in `cat gpgkeys.txt`; do
+          gpg --list-keys ${key} || (gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
+        done
+      else
     - gpg --export > keys.out
+    - echo $SHA > checksum.txt
   cache:
     key: nodejs.gpg.keyring
     paths:
+      - checksum.txt
       - keys.out
+    when: on_success
   artifacts:
+    when: on_success
     paths:
       - keys.out
     expire_in: 1 day
