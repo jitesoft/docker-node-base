@@ -55,6 +55,9 @@ download:pgp:
   rules:
     - if: "$BUILD"
       when: always
+    - changes:
+        - gpgkeys.txt
+      when: always
     - when: never
   stage: pre
   image: registry.gitlab.com/jitesoft/dockerfiles/misc:latest
