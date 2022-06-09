@@ -64,7 +64,7 @@ download:pgp:
   before_script:
     - "[ -f checksum.txt ] || touch checksum.txt"
   script:
-    - SHA=$(sha256sum checksum.txt)
+    - SHA=$(sha256sum keys.out)
     - |
       if [ "$(cat checksum.txt)" != "${SHA}" ]; then
         for key in `cat gpgkeys.txt`; do
@@ -72,6 +72,7 @@ download:pgp:
         done
       fi
     - gpg --export > keys.out
+    - SHA=$(sha256sum keys.out)
     - echo $SHA > checksum.txt
   cache:
     key: nodejs.gpg.keyring
