@@ -68,7 +68,7 @@ download:pgp:
     - |
       if [ "$(cat checksum.txt)" != "${SHA}" ]; then
         for key in `cat gpgkeys.txt`; do
-          gpg --list-keys ${key} || (gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
+          gpg --list-keys ${key} || (gpg --keyserver hkps://keys.openpgp.org --recv-keys "$key" || gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" || gpg --keyserver pgp.mit.edu --recv-keys "$key" || gpg --keyserver keyserver.pgp.com --recv-keys "$key" || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key")
         done
       fi
     - gpg --export > keys.out
