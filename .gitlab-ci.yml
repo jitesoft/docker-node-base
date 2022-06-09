@@ -81,7 +81,7 @@ download:tars:
   stage: download
   rules:
     - if: "$BUILD"
-      when: always
+      when: on_success
     - when: never
   needs:
     - job: download:pgp
@@ -106,7 +106,7 @@ download:tars:
   stage: build
   rules:
     - if: "$BUILD"
-      when: always
+      when: on_success
     - when: never
   image: registry.gitlab.com/jitesoft/dockerfiles/misc/buildbase:latest
   needs:
@@ -163,7 +163,7 @@ containerize:slim:
   stage: containerize
   rules:
     - if: "$BUILD"
-      when: always
+      when: on_success
     - when: never
   needs:
     - job: build:amd
@@ -187,7 +187,7 @@ containerize:full:
   stage: containerize
   rules:
     - if: "$BUILD"
-      when: always
+      when: on_success
     - when: never
   needs:
     - job: build:amd
