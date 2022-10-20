@@ -18,7 +18,7 @@ stages:
 check:
   parallel:
     matrix:
-      - { VERSION: "14", TYPE: "fermium", EXTRA: "" }
+      - { VERSION: "14", TYPE: "fermium" }
       - { VERSION: "16", TYPE: "gallium", EXTRA: "maintenance-lts" }
       - { VERSION: "18", TYPE: "hydrogen", EXTRA: "lts" }
       - { VERSION: "19", TYPE: "latest", EXTRA: "current" }
