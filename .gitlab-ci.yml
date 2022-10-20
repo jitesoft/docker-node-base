@@ -18,9 +18,10 @@ stages:
 check:
   parallel:
     matrix:
-      - { VERSION: "14", TYPE: "fermium", EXTRA: "maintenance-lts" }
-      - { VERSION: "16", TYPE: "gallium", EXTRA: "lts" }
-      - { VERSION: "18", TYPE: "latest", EXTRA: "current" }
+      - { VERSION: "14", TYPE: "fermium", EXTRA: "" }
+      - { VERSION: "16", TYPE: "gallium", EXTRA: "maintenance-lts" }
+      - { VERSION: "18", TYPE: "hydrogen", EXTRA: "lts" }
+      - { VERSION: "19", TYPE: "latest", EXTRA: "current" }
   stage: pre
   variables:
     GIT_STRATEGY: none
