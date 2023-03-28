@@ -20,19 +20,12 @@ stages:
 update-readme:
   stage: readme
   extends: .readme-check.v2
+  parallel:
+    matrix:
+      - { REGISTRIES: "quay.io/jitesoft/node-base,docker.io/jitesoft/node-base", PUSHRM_FILE: "$CI_PROJECT_DIR/README.md" }
+      - { REGISTRIES: "quay.io/jitesoft/node,docker.io/jitesoft/node", PUSHRM_FILE: "$CI_PROJECT_DIR/README-2.md" }
   variables:
-    PUSHRM_FILE: "$CI_PROJECT_DIR/README.md"
     GIT_DEPTH: "3"
-    REGISTRIES: "quay.io/jitesoft/node-base,docker.io/jitesoft/node-base"
-  tags: [ protected ]
-
-update-readme2:
-  stage: readme
-  extends: .readme-check.v2
-  variables:
-    PUSHRM_FILE: "$CI_PROJECT_DIR/README-2.md"
-    GIT_DEPTH: "3"
-    REGISTRIES: "quay.io/jitesoft/node,docker.io/jitesoft/node"
   tags: [ protected ]
 
 check:
