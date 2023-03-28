@@ -1,19 +1,39 @@
-include:
-  - https://gitlab.com/jitesoft/gitlab-ci-lib/raw/master/Scan/trivy.yml
-
 workflow:
   rules:
-    - if: "$CI_COMMIT_BRANCH == 'master'"
-      when: always
-    - when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  - file: /Scan/trivy.yml
+    project: jitesoft/gitlab-ci-lib
+  - file: /OCI/push-readme.yml
+    project: jitesoft/gitlab-ci-lib
 
 stages:
+  - readme
   - pre
   - download
   - build
   - containerize
   - scan
   - notify
+
+update-readme:
+  stage: readme
+  extends: .readme-check.v2
+  variables:
+    PUSHRM_FILE: "$CI_PROJECT_DIR/README.md"
+    GIT_DEPTH: "3"
+    REGISTRIES: "quay.io/jitesoft/node-base,docker.io/jitesoft/node-base"
+  tags: [ protected ]
+
+update-readme2:
+  stage: readme
+  extends: .readme-check.v2
+  variables:
+    PUSHRM_FILE: "$CI_PROJECT_DIR/README-2.md"
+    GIT_DEPTH: "3"
+    REGISTRIES: "quay.io/jitesoft/node,docker.io/jitesoft/node"
+  tags: [ protected ]
 
 check:
   parallel:
