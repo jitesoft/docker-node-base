@@ -1,6 +1,6 @@
 # Node
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/jitesoft/node.svg)](hhttps://hub.docker.com/r/jitesoft/node)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jitesoft/node.svg)](https://hub.docker.com/r/jitesoft/node)
 [![Back project](https://img.shields.io/badge/Open%20Collective-Tip%20the%20devs!-blue.svg)](https://opencollective.com/jitesoft-open-source)
 
 Docker image containing Node.js, using alpine linux as base.  
@@ -15,16 +15,10 @@ Tags are based on the latest versions at build time, with `latest` tag refering 
 
 Images can be found at:
 
-* [DockerHub](https://hub.docker.com/r/jitesoft/node)
-    * `docker.io/jitesoft/node`
-* [GitLab](https://gitlab.com/jitesoft/dockerfiles/node-base)
-    * `registry.gitlab.com/jitesoft/dockerfiles/node-base/full`
-* [GitHub](https://github.com/orgs/jitesoft/packages/container/package/node)
-    * `ghcr.io/jitesoft/node`
-* [Quay](https://quay.io/jitesoft/node)
-    * `quay.io/jitesoft/node`
-
-_OBSERVE: Currently, all pushes to Quay are paused until their multi-arch support is working as intended._  
+* [DockerHub](https://hub.docker.com/r/jitesoft/node) `docker.io/jitesoft/node`
+* [GitLab](https://gitlab.com/jitesoft/dockerfiles/node-base) `registry.gitlab.com/jitesoft/dockerfiles/node-base/full` 
+* [GitHub](https://github.com/orgs/jitesoft/packages/container/package/node) `ghcr.io/jitesoft/node`
+* [Quay](https://quay.io/jitesoft/node) `quay.io/jitesoft/node`
 
 ## Docker files
 
@@ -43,8 +37,9 @@ Read the nodejs license [here](https://github.com/nodejs/node/blob/master/LICENS
 
 Jitesoft images are built via GitLab CI on runners hosted by the following wonderful organisations:
 
-[![Fosshost Logo](https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/fosshostx128.png)](https://fosshost.org)
-[![Aarch64 logo](https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/aarch64x128.png)](https://aarch64.com)
+<a href="https://osuosl.org/" target="_blank" title="Oregon State University - Open Source Lab">
+    <img src="https://jitesoft.com/images/oslx128.webp" alt="Oregon State University - Open Source Lab">
+</a>
 
 _The companies above are not affiliated with Jitesoft or any Jitesoft Projects directly._
 
@@ -52,7 +47,7 @@ _The companies above are not affiliated with Jitesoft or any Jitesoft Projects d
 
 Sponsoring is vital for the further development and maintaining of open source.  
 Questions and sponsoring queries can be made by <a href="mailto:sponsor@jitesoft.com">email</a>.  
-If you wish to sponsor our projects, reach out to the email above or visit any of the following sites:
+If you wish to sponsor our projects, reach out to the email above or visit any of the following sites:  
 
 [Open Collective](https://opencollective.com/jitesoft-open-source)  
 [GitHub Sponsors](https://github.com/sponsors/jitesoft)  

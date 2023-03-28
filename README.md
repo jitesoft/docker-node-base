@@ -16,16 +16,10 @@ Tags are based on the latest versions at build time, with `latest` tag refering 
 
 Images can be found at:
 
-* [DockerHub](https://hub.docker.com/r/jitesoft/node-base)
-    * `docker.io/jitesoft/node-base`
-* [GitLab](https://gitlab.com/jitesoft/dockerfiles/node-base)
-    * `registry.gitlab.com/jitesoft/dockerfiles/node-base`
-* [GitHub](https://github.com/orgs/jitesoft/packages/container/package/node-base)
-    * `ghcr.io/jitesoft/node-base`
-* [Quay](https://quay.io/jitesoft/node-base)
-    * `quay.io/jitesoft/node-base`
-
-_OBSERVE: Currently, all pushes to Quay are paused until their multi-arch support is working as intended._  
+* [DockerHub](https://hub.docker.com/r/jitesoft/node-base) `docker.io/jitesoft/node-base`
+* [GitLab](https://gitlab.com/jitesoft/dockerfiles/node-base) `registry.gitlab.com/jitesoft/dockerfiles/node-base` 
+* [GitHub](https://github.com/orgs/jitesoft/packages/container/package/node-base) `ghcr.io/jitesoft/node-base`
+* [Quay](https://quay.io/jitesoft/node-base) `quay.io/jitesoft/node-base`
 
 ### Dockerfile
 
@@ -44,8 +38,9 @@ Read the nodejs license [here](https://github.com/nodejs/node/blob/master/LICENS
 
 Jitesoft images are built via GitLab CI on runners hosted by the following wonderful organisations:
 
-[![Fosshost Logo](https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/fosshostx128.png)](https://fosshost.org)
-[![Aarch64 logo](https://raw.githubusercontent.com/jitesoft/misc/master/sponsors/aarch64x128.png)](https://aarch64.com)
+<a href="https://osuosl.org/" target="_blank" title="Oregon State University - Open Source Lab">
+    <img src="https://jitesoft.com/images/oslx128.webp" alt="Oregon State University - Open Source Lab">
+</a>
 
 _The companies above are not affiliated with Jitesoft or any Jitesoft Projects directly._
 
@@ -53,7 +48,7 @@ _The companies above are not affiliated with Jitesoft or any Jitesoft Projects d
 
 Sponsoring is vital for the further development and maintaining of open source.  
 Questions and sponsoring queries can be made by <a href="mailto:sponsor@jitesoft.com">email</a>.  
-If you wish to sponsor our projects, reach out to the email above or visit any of the following sites:
+If you wish to sponsor our projects, reach out to the email above or visit any of the following sites:  
 
 [Open Collective](https://opencollective.com/jitesoft-open-source)  
 [GitHub Sponsors](https://github.com/sponsors/jitesoft)  
