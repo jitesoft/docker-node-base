@@ -223,7 +223,7 @@ notify:node-yarn:
       when: on_success
   script:
     - echo "Notifying Yarn job."
-    - curl -F token=${NOTIFY_TOKEN} -F ref=master  -F "variables[NODE_MAJOR]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}"  https://gitlab.com/api/v4/projects/4048627/trigger/pipeline
+    - curl -F token=${NOTIFY_TOKEN} -F ref=master  -F "variables[NODE_MAJOR]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" F "variables[RELEASE_NAME]=${TYPE}" https://gitlab.com/api/v4/projects/4048627/trigger/pipeline
 
 create:cache:
   stage: .post
