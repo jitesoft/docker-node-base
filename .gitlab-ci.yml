@@ -31,7 +31,7 @@ update-readme:
 check:
   parallel:
     matrix:
-      - { VERSION: "18", TYPE: "hydrogen", EXTRA: "" }
+      - { VERSION: "18", TYPE: "hydrogen", EXTRA: "security-lts" }
       - { VERSION: "20", TYPE: "iron", EXTRA: "maintenance-lts" }
       - { VERSION: "22", TYPE: "jod", EXTRA: "lts" }
       - { VERSION: "23", TYPE: "latest", EXTRA: "current" }
@@ -53,7 +53,7 @@ check:
     - |
       if [ ! -z "${FORCE_BUILD+x}" ] || [ "${FULL_VERSION}" != "$(cat ${VERSION}.txt)" ] || [ "${NPM_VERSION}" != "$(cat npm-version.txt)" ]; then
         echo "Full version ${FULL_VERSION} is not same as current. Will build."
-        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
+        curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[VERSION]=${VERSION}" -f "variables[EXTRA]=${EXTRA}" -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[TYPE]=${TYPE}" -F "variables[BUILD]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
       else
         echo "Only scan ${FULL_VERSION}."
         curl -F token=${CI_JOB_TOKEN} -F ref=master -F "variables[FULL_VERSION]=${FULL_VERSION}" -F "variables[SCAN]=true" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline
