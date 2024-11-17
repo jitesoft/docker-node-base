@@ -208,7 +208,7 @@ containerize:full:
       artifacts: true
   script:
     - TAGS=$(helper "${CI_REGISTRY_IMAGE}/full,jitesoft/node,ghcr.io/jitesoft/node,quay.io/jitesoft/node,quay.io/jitesoft/node" "${VERSION},${FULL_VERSION},${TYPE}")
-    - docker buildx build --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg BUILD_TIME="$(date -Iseconds)" --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
+    - docker buildx build --sbom=true --provenance=true --platform linux/amd64,linux/arm64 --push ${TAGS} --build-arg BUILD_TIME="$(date -Iseconds)" --build-arg NODE_VERSION=${VERSION} --progress plain -f full/Dockerfile .
   tags:
     - protected
     - buildx
