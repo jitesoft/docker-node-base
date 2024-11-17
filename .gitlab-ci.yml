@@ -133,7 +133,7 @@ download:tars:
       artifacts: true
   before_script:
     - apk add --no-cache binutils-gold git python3 libstdc++ zlib-dev openssl-dev
-    - ln -s /usr/bin/python3 /usr/bin/python; fi
+    - ln -s /usr/bin/python3 /usr/bin/python
     - if [ ! -d "ccache" ]; then mkdir ccache; fi
     - export PATH="/usr/lib/ccache/bin:$PATH"
     - export CCACHE_DIR="${CI_PROJECT_DIR}/ccache"
