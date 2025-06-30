@@ -34,7 +34,7 @@ check:
       - { VERSION: "18", TYPE: "hydrogen", EXTRA: "security-lts" }
       - { VERSION: "20", TYPE: "iron", EXTRA: "maintenance-lts" }
       - { VERSION: "22", TYPE: "jod", EXTRA: "lts" }
-      - { VERSION: "23", TYPE: "latest", EXTRA: "current" }
+      - { VERSION: "24", TYPE: "latest", EXTRA: "current" }
   stage: pre
   variables:
     GIT_STRATEGY: none
