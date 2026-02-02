@@ -33,7 +33,7 @@ check:
     matrix:
       - { VERSION: "20", TYPE: "iron", EXTRA: "security-lts" }
       - { VERSION: "22", TYPE: "jod", EXTRA: "maintenance-lts" }
-      - { VERSION: "24", TYPE: "latest", EXTRA: "lts" }
+      - { VERSION: "24", TYPE: "krypton", EXTRA: "lts" }
       - { VERSION: "25", TYPE: "latest", EXTRA: "current" }
   stage: pre
   variables:
