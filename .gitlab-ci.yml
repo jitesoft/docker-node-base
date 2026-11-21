@@ -31,10 +31,9 @@ update-readme:
 check:
   parallel:
     matrix:
-      - { VERSION: "20", TYPE: "iron", EXTRA: "security-lts" }
-      - { VERSION: "22", TYPE: "jod", EXTRA: "maintenance-lts" }
-      - { VERSION: "24", TYPE: "krypton", EXTRA: "lts" }
-      - { VERSION: "25", TYPE: "latest", EXTRA: "current" }
+      - { VERSION: "22", TYPE: "jod", EXTRA: "security-lts" }
+      - { VERSION: "24", TYPE: "krypton", EXTRA: "maintenance-lts" }
+      - { VERSION: "26", TYPE: "lithium", EXTRA: "lts,latest,current" }
   stage: pre
   variables:
     GIT_STRATEGY: none
